@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['svrcontrollerconnectionstate',['svrControllerConnectionState',['../svr_api_8h.html#a055ecf82195bce34818bb7ccab91eb09',1,'svrApi.h']]],
+  ['svrcontrollermessagetype',['svrControllerMessageType',['../svr_api_8h.html#ae29f1e026a0a8ad95c3761a1b4f1fd02',1,'svrApi.h']]],
+  ['svrcontrollerquerytype',['svrControllerQueryType',['../svr_api_8h.html#ac23cd518ac3159c4bd3f4257a4133c41',1,'svrApi.h']]],
+  ['svreventtype',['svrEventType',['../svr_api_8h.html#aa4478a7c9686d7db4f2ec7f092716d64',1,'svrApi.h']]],
+  ['svreyemask',['svrEyeMask',['../svr_api_8h.html#a9446ebd64cfdb6a72677b4ff96c7a763',1,'svrApi.h']]],
+  ['svreyeposestatus',['svrEyePoseStatus',['../svr_api_8h.html#a11152a6d675aa331782c67b1ac77f5a4',1,'svrApi.h']]],
+  ['svrframeoption',['svrFrameOption',['../svr_api_8h.html#a0997665c5565a8892fcb80994cef7388',1,'svrApi.h']]],
+  ['svrlayerflags',['svrLayerFlags',['../svr_api_8h.html#a3140b8121e943ded0ab6fa910176b457',1,'svrApi.h']]],
+  ['svroptionflags',['svrOptionFlags',['../svr_api_8h.html#ada720de90497778466d9e4755c229e1b',1,'svrApi.h']]],
+  ['svrperflevel',['svrPerfLevel',['../svr_api_8h.html#a5a6ff86952a32b35cb724e3af33a6be7',1,'svrApi.h']]],
+  ['svrtexturetype',['svrTextureType',['../svr_api_8h.html#aca1704408028c486199ef1bd30ea4096',1,'svrApi.h']]],
+  ['svrtrackingmode',['svrTrackingMode',['../svr_api_8h.html#ad9900d9cbb319a8f5eafd6ad3cb3cd62',1,'svrApi.h']]],
+  ['svrwarpmeshenum',['svrWarpMeshEnum',['../svr_api_8h.html#a8372b94840c28afce925e67f0e8eae79',1,'svrApi.h']]],
+  ['svrwarpmeshtype',['svrWarpMeshType',['../svr_api_8h.html#a9e4d31f0d4a40dc17b6b5241369be5be',1,'svrApi.h']]],
+  ['svrwarptype',['svrWarpType',['../svr_api_8h.html#a90e6fce532a1335b3aa35b7bfd26260b',1,'svrApi.h']]],
+  ['svrwhicheye',['svrWhichEye',['../svr_api_8h.html#a7d181f39b9d16d8c9f4f82a49cb6208a',1,'svrApi.h']]]
+];

@@ -1,0 +1,238 @@
+// Crop Debug
+gMeshAspectRatio = 1
+
+// Screen Properties
+gEyeBufferWidth = 1920
+gEyeBufferHeight = 1080
+
+gEyeBufferFovX = 46.0
+gEyeBufferFovY = 25.0
+
+// Eye Frustum
+
+gFrustum_Convergence = 2.4384	// View convergence distance (meters)
+gFrustum_Pitch = 0.0		// View pitch angle (degrees)
+
+// Left Eye Frustum
+
+gLeftFrustum_Far = 100.0
+gLeftFrustum_Near = 0.0225
+gLeftFrustum_Left = -0.00955
+gLeftFrustum_Right = 0.00955
+gLeftFrustum_Top = 0.00537
+gLeftFrustum_Bottom = -0.00537
+
+// Right Eye Frustum
+
+gRightFrustum_Far = 100.0
+gRightFrustum_Near = 0.0225
+gRightFrustum_Left = -0.00955
+gRightFrustum_Right = 0.00955
+gRightFrustum_Top = 0.00537
+gRightFrustum_Bottom = -0.00537
+
+// TimeWarp Properties
+gEnableTimeWarp = true
+gDisableReprojection = false
+gDisableLensCorrection = true
+gDirectModeWarp = true
+gSingleBufferWindow = true
+gTimeWarpThreadCore = 4
+gRenderThreadCore = 5
+gBusyWait = false
+gForceMinVsync = 0
+gEnableWarpThreadFifo = true
+gEnableRenderThreadFifo = true
+gUseLinePtr = false
+gRecenterFrames = 20
+gSensorInitializeFrames = 0
+gTimeWarpMinLoopTime = 0
+gTimeWarpWaitBias = 0.0
+
+gApplyDisplaySkew = true
+gApplyDisplaySquash = true
+gSkewScaleFactor = 1.0
+gSquashScaleFactor = 1.0
+
+
+//Prediction Properties
+gDisablePredictedTime = false
+
+// Base IMU delay (milliseconds).  How old is pose before it is recorded?
+// Time is not reflected in the pose age.
+gIMUSensorPoseDelay = 3.0
+
+// Time (milliseconds) to get to Half Exposure on the display.
+// This usually T/2, but this property can be used to adjust for OLED vs LCD, getting to 3T/4, additional display delay time, etc.
+gTimeToHalfExposure = 8.33
+
+// Time (milliseconds) to adjust for midway between left and right eye warp.
+// The predicted time is to when the left eye will be warped. The right eye
+// will be warped T/2 later.  To minimize the warp on each eye, this difference
+// can be split between them. Fine tuning and other parameters can cause this
+// value to not be exactly T/2. Turn on "gLogPrediction" to evaluate
+gTimeToMidEyeWarp = 0.0
+
+// Max allowable predicted pose time (milliseconds)
+gMaxPredictedTime = 50.0
+
+// If using a heuristic approach to prediction
+gHeuristicPredictedTime = false
+
+// If heuristic approach, how many entries to average
+gNumHeuristicEntries = 25
+
+// May not want the heuristic values to be the exact first eye.
+// This time (milliseconds) is added to the predicted display time
+gHeuristicOffset = 0.0
+
+gTimeWarpClearBuffer = false
+gTimeWarpClearColorR = 0.0
+gTimeWarpClearColorG = 0.0
+gTimeWarpClearColorB = 0.0
+gTimeWarpClearColorA = 1.0
+
+// Tracking Properties
+gForceTrackingMode = 0	// 0 = NoOverride; 1 = Rotation; 2 = Position; 3 = Both
+gUseMagneticRotationFlag = true
+
+//Performance Properties
+
+gUseQvrPerfModule = true
+
+gForceCpuLevel = -1 // -1 = NoOverride; 0 = System; 1..3 = LevelIndex
+gCpuLvl1Min = 30
+gCpuLvl1Max = 50
+gCpuLvl2Min = 51
+gCpuLvl2Max = 80
+gCpuLvl3Min = 81
+gCpuLvl3Max = 100
+
+gForceGpuLevel = -1 // -1 = NoOverride; 0 = System; 1..3 = LevelIndex
+gGpuLvl1Min = 30
+gGpuLvl1Max = 50
+gGpuLvl2Min = 51
+gGpuLvl2Max = 80
+gGpuLvl3Min = 81
+gGpuLvl3Max = 100
+
+// Sensor Parameters
+gSensorHomePosition = 0     // 0 = Landscape Left; 1 = Landscape Right
+gSensorOrientationCorrectX = 0.0
+gSensorOrientationCorrectY = 8.0
+gSensorOrientationCorrectZ = 0.0
+
+// Offset from between eye to IMU (meters)
+gSensorHeadOffsetX = -0.03324
+gSensorHeadOffsetY = -0.02335
+gSensorHeadOffsetZ = 0.0195
+
+// Minimum pose quality allowed (From range [0.0, 1.0])
+gMinPoseQuality = 0.2
+
+// Warp Mesh
+gWarpMeshType = 2     // 0 = Columns (Left To Right); 1 = Columns (Right To Left); 2 = Rows (Top To Bottom); 3 = Rows (Bottom To Top)
+gWarpMeshRows = 50
+gWarpMeshCols = 50
+gWarpEqrMeshRadius = 1.0
+gWarpEqrMeshScale = 1.0
+
+gMeshOffsetLeftX = 0.0
+gMeshOffsetLeftY = 0.0
+gMeshOffsetRightX = 0.0
+gMeshOffsetRightY = 0.0
+
+// Vignette
+gMeshVignette = false
+gVignetteRadius = 0.7
+
+// Warp Mesh discard UV value (Should be <= 1.0 or may see artifacts in image textures that don't have clamp to border)
+gMeshDiscardUV = 1.0
+
+// Clamp to Border
+gClampBorderEnabled = true
+gClampBorderColorR = 0.0
+gClampBorderColorG = 0.0
+gClampBorderColorB = 0.0
+gClampBorderColorA = 1.0
+
+// Stencil Mesh
+gStencilMeshEnabled = false
+gStencilMeshRadius = 0.95
+gStencilMeshColorR = 0.0
+gStencilMeshColorG = 0.0
+gStencilMeshColorB = 0.0
+gStencilMeshColorA = 1.0
+
+// Lens Parameters
+gLensOffsetX = -0.0
+gLensOffsetY = -0.0
+
+// Lens Distortion Polynomial: K0 + K1*r + K2*r^2 + K3*r^3 + K4*r^4 + K5*r^5 + K6*r^6
+// This provides a distortion scale
+gLensInverse = false
+
+gLensPolyK0 = 1.0
+gLensPolyK1 = 0.0
+gLensPolyK2 = 0.0
+gLensPolyK3 = 0.0
+gLensPolyK4 = 0.0
+gLensPolyK5 = 0.0
+gLensPolyK6 = 0.0
+
+// Chromatic Aberration Correction: K0 + K1*r + K2*r^2 + K3*r^3 + K4*r^5 + K4*r^5 + K6*r^6
+// This is multiplied by the distortion scale calculated above
+//gChromaticPolyK0_R = 0.9940
+//gChromaticPolyK1_R = 0.0
+//gChromaticPolyK2_R = 0.0
+//gChromaticPolyK3_R = 0.0
+//gChromaticPolyK4_R = 0.0
+//gChromaticPolyK5_R = 0.0
+//gChromaticPolyK6_R = 0.0
+
+//gChromaticPolyK0_G = 1.0
+//gChromaticPolyK1_G = 0.0
+//gChromaticPolyK2_G = 0.0
+//gChromaticPolyK3_G = 0.0
+//gChromaticPolyK4_G = 0.0
+//gChromaticPolyK5_G = 0.0
+//gChromaticPolyK6_G = 0.0
+
+//gChromaticPolyK0_B = 1.0105
+//gChromaticPolyK1_B = 0.0
+//gChromaticPolyK2_B = 0.0
+//gChromaticPolyK3_B = 0.0
+//gChromaticPolyK4_B = 0.0
+//gChromaticPolyK5_B = 0.0
+//gChromaticPolyK6_B = 0.0
+
+//Logging Options
+gLogEyeOverSleep = false
+gLogSubmitFps = true
+gLogFrameDoubles = false
+gLogMeshCreation = false
+gLogRawSensorData = false
+
+//Debug Server
+gEnableDebugServer = false
+gDebugServerPort = 8080
+
+// Motion To Photon Test
+gMotionToPhotonC = 100.0
+gMotionToPhotonAccThreshold = 0.0002
+gLogLinePtrDelay = 0.0
+
+// Debug Fixed Rotation
+gUseFixedRotation = false
+gFixedRotationQuatX = 0.0
+gFixedRotationQuatY = 0.0
+gFixedRotationQuatZ = 0.0
+gFixedRotationQuatW = 1.0
+
+// Debug Fixed Position
+gUseFixedPosition = false
+gFixedPositionX = 0.0
+gFixedPositionY = 0.0
+gFixedPositionZ = 0.0
+
+gControllerService = "com.qti.acg.apps.controllers.ximmerse/com.qti.acg.apps.controllers.ximmerse.XimmerseControllerService"

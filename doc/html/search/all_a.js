@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['kdisablechromaticcorrection',['kDisableChromaticCorrection',['../svr_api_8h.html#a0997665c5565a8892fcb80994cef7388a49d1956ca4677a1cd125678b6f50274e',1,'svrApi.h']]],
+  ['kdisabledistortioncorrection',['kDisableDistortionCorrection',['../svr_api_8h.html#a0997665c5565a8892fcb80994cef7388a77a7710cd8940fce56c4d9cab0852a8c',1,'svrApi.h']]],
+  ['kdisablereprojection',['kDisableReprojection',['../svr_api_8h.html#a0997665c5565a8892fcb80994cef7388a2040350f212ef006c36b7df1fa2a0326',1,'svrApi.h']]],
+  ['kenablemotiontophoton',['kEnableMotionToPhoton',['../svr_api_8h.html#a0997665c5565a8892fcb80994cef7388a7868888e5a598e9b4350313d7d47b118',1,'svrApi.h']]],
+  ['kperfmaximum',['kPerfMaximum',['../svr_api_8h.html#a5a6ff86952a32b35cb724e3af33a6be7aef82aa00255d99cadb65d770450e9f6d',1,'svrApi.h']]],
+  ['kperfmedium',['kPerfMedium',['../svr_api_8h.html#a5a6ff86952a32b35cb724e3af33a6be7a010fe8aa095eebff3eace0aee26bf9ee',1,'svrApi.h']]],
+  ['kperfminimum',['kPerfMinimum',['../svr_api_8h.html#a5a6ff86952a32b35cb724e3af33a6be7a5c3102b3602d40531dddb43d86a2faca',1,'svrApi.h']]],
+  ['kperfsystem',['kPerfSystem',['../svr_api_8h.html#a5a6ff86952a32b35cb724e3af33a6be7a8250b51b34170038c6255bec6237b14c',1,'svrApi.h']]],
+  ['ksimple',['kSimple',['../svr_api_8h.html#a90e6fce532a1335b3aa35b7bfd26260ba66def9a432bacb7d44369f4694d38fc1',1,'svrApi.h']]],
+  ['ktypecubemaptexture',['kTypeCubemapTexture',['../svr_api_8h.html#aca1704408028c486199ef1bd30ea4096ab9b29685dbd8f20c13306dd424751769',1,'svrApi.h']]],
+  ['ktypeequirectimage',['kTypeEquiRectImage',['../svr_api_8h.html#aca1704408028c486199ef1bd30ea4096ad6d0bebabc63e6561082f2d3ea011d55',1,'svrApi.h']]],
+  ['ktypeequirecttexture',['kTypeEquiRectTexture',['../svr_api_8h.html#aca1704408028c486199ef1bd30ea4096a1720ddc0e68545d2bd0b72adee444940',1,'svrApi.h']]],
+  ['ktypeimage',['kTypeImage',['../svr_api_8h.html#aca1704408028c486199ef1bd30ea4096a8b19e5b8a29345288067b94c77bfc59f',1,'svrApi.h']]],
+  ['ktypetexture',['kTypeTexture',['../svr_api_8h.html#aca1704408028c486199ef1bd30ea4096acd9f6d3311c4723ed05d48b2c7bf771b',1,'svrApi.h']]],
+  ['ktypetexturearray',['kTypeTextureArray',['../svr_api_8h.html#aca1704408028c486199ef1bd30ea4096aee92cd8ae2e4cd8db2ab2daf56371ed7',1,'svrApi.h']]],
+  ['ktypevulkan',['kTypeVulkan',['../svr_api_8h.html#aca1704408028c486199ef1bd30ea4096af4a612390f5b579e245e386d1d747579',1,'svrApi.h']]]
+];

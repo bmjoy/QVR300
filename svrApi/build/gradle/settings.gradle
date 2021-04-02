@@ -1,0 +1,11 @@
+rootProject.name = "svrApi"
+// include ':360photoViewer'
+// project(':360photoViewer').projectDir = new File('../../../samples/360photoViewer')
+//include ':apiTest'
+//project(':apiTest').projectDir = new File('../../../samples/apiTest')
+//include ':vulkanTest'
+//project(':vulkanTest').projectDir = new File('../../../samples/vulkanTest')
+
+
+
+

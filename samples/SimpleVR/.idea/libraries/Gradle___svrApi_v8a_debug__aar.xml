@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: :svrApi-v8a-debug:@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f000358da87f961f2885fdea68b30ca7/svrApi-v8a-debug/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f000358da87f961f2885fdea68b30ca7/svrApi-v8a-debug/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f000358da87f961f2885fdea68b30ca7/svrApi-v8a-debug/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

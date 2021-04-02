@@ -1,0 +1,112 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+buildscript {
+    repositories {
+		google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.0.1'
+    }
+}
+apply plugin: 'com.android.application'
+project.ext.SVRLocation = System.getenv('SVR_HOME') + '/svrApi/libs'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "27.0.2"
+    repositories {
+        flatDir {
+            dirs project.ext.SVRLocation
+        }
+    }
+		
+    defaultConfig {
+        applicationId "com.qualcomm.svr.apps.photoViewer"
+        minSdkVersion 25
+        targetSdkVersion 25
+		manifestPlaceholders = ["orientation" : "landscape"]
+        jackOptions {
+            enabled true
+        }
+    }
+	
+	signingConfigs{
+		unsigned{
+			storeFile file("${System.env.USERPROFILE}/.android/debug.keystore")
+			storePassword = "android"
+			keyAlias = "androiddebugkey"
+			keyPassword = "android"
+			v2SigningEnabled = false
+		}
+	}
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+			signingConfig signingConfigs.unsigned
+        }
+        debug {
+            debuggable = true
+            jniDebuggable = true
+        }
+		
+    }
+	
+	flavorDimensions "screenOrientation"
+    
+			productFlavors {
+			ll {
+				dimension "screenOrientation"
+				manifestPlaceholders =  ["orientation" : "landscape"]
+			}
+
+			lr {
+				dimension "screenOrientation"
+				manifestPlaceholders = ["orientation" : "reverseLandscape"]
+			}
+		}
+    sourceSets
+            {
+                main
+                        {
+                            java.srcDirs = ['java']
+                            manifest.srcFile 'AndroidManifest.xml'
+                            res.srcDirs = ['res']
+                        }
+            }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // use internal only when svrapi/private available
+    compile project(path: ':', configuration: 'default')
+	debugImplementation(name: 'svrApi-debug', ext: 'aar')
+    releaseImplementation(name: 'svrApi-release', ext: 'aar')
+}
+
+android.buildTypes.all { theBuildType ->
+    task ("extractSvrSo${theBuildType.name}") {
+	        
+		tasks.whenTaskAdded { task ->
+            if( task.name.startsWith("externalNativeBuild") && task.name.endsWith(theBuildType.name.substring(1))) {
+                task.dependsOn 'extractSvrSo' + theBuildType.name
+            }
+        }
+        doLast {
+		
+            copy {
+                from zipTree(project.ext.SVRLocation + "/svrApi-" + theBuildType.name + ".aar")
+                into ".svrLibs/" + theBuildType.name
+                include "jni/**/*.so"
+            }
+        }
+    }
+}
+
+

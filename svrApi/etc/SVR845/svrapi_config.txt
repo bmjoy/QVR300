@@ -1,0 +1,306 @@
+// Screen Properties
+gEyeBufferWidth = 1024
+gEyeBufferHeight = 1152
+
+gEyeBufferFovX = 80.0
+gEyeBufferFovY = 90.0
+
+gMeshAspectRatio = 1.0
+
+// Left Eye Frustum
+gLeftFrustum_Near = 0.050372
+gLeftFrustum_Far = 100.0
+gLeftFrustum_Left = -0.0428856
+gLeftFrustum_Right = 0.0428856
+gLeftFrustum_Top = 0.0480771
+gLeftFrustum_Bottom = -0.0480771
+
+// Right Eye Frustum
+gRightFrustum_Near = 0.050372
+gRightFrustum_Far = 100.0
+gRightFrustum_Left = -0.0428856
+gRightFrustum_Right = 0.0428856
+gRightFrustum_Top = 0.0480771
+gRightFrustum_Bottom = -0.0480771
+
+// TimeWarp Properties
+gEnableTimeWarp = true
+gDisableReprojection = false
+gDisablePredictedTime = false
+gDisableLensCorrection = false
+gDirectModeWarp = true
+gSingleBufferWindow = true
+gTimeWarpThreadCore = 4
+gRenderThreadCore = 5
+gBusyWait = false
+gForceMinVsync = 0
+gEnableWarpThreadFifo = true
+gEnableRenderThreadFifo = true
+gUseLinePtr = false
+gRecenterFrames = 20
+gSensorInitializeFrames = 0
+gTimeWarpMinLoopTime = 0
+gTimeWarpWaitBias = 0.0
+
+gTimeWarpClearBuffer = false
+gTimeWarpClearColorR = 0.0
+gTimeWarpClearColorG = 0.0
+gTimeWarpClearColorB = 0.0
+gTimeWarpClearColorA = 1.0
+
+// For debugging and movie captures may not want to render each eye
+gTimeWarpEnabledEyeMask = 3 // svrEyeMask Bit Field: 1 = Left; 2 = Right; 3 = Both
+
+// Compositing value
+gCompositeRadius = 0.25
+
+gForceColorSpace = -1
+
+// Tracking Properties
+gForceTrackingMode = 0	// Bit Field: 0 = NoOverride; 1 = Rotation; 2 = Position; 4 = Eye Tracking
+gUseMagneticRotationFlag = true
+
+//Performance Properties
+
+gUseQvrPerfModule = true
+
+gForceCpuLevel = -1 // -1 = NoOverride; 0 = System; 1..3 = LevelIndex
+gCpuLvl1Min = 30
+gCpuLvl1Max = 50
+gCpuLvl2Min = 51
+gCpuLvl2Max = 80
+gCpuLvl3Min = 81
+gCpuLvl3Max = 100
+
+gForceGpuLevel = -1 // -1 = NoOverride; 0 = System; 1..3 = LevelIndex
+gGpuLvl1Min = 30
+gGpuLvl1Max = 50
+gGpuLvl2Min = 51
+gGpuLvl2Max = 80
+gGpuLvl3Min = 81
+gGpuLvl3Max = 100
+
+// Sensor Parameters
+gSensorOrientationCorrectX = 0.0
+gSensorOrientationCorrectY = 0.0
+gSensorOrientationCorrectZ = 0.0
+
+// Offset from center of head (meters) to actual device
+gSensorHeadOffsetX = 0.0
+gSensorHeadOffsetY = 0.0
+gSensorHeadOffsetZ = 0.095
+
+// Offset and Scale from center of eyes (meters) to actual device
+gSensorEyeOffsetX = 0.01
+gSensorEyeOffsetY = -0.08
+gSensorEyeScaleX = 1.24
+gSensorEyeScaleY = 1.20
+
+// Minimum pose quality allowed (From range [0.0, 1.0])
+gMinPoseQuality = 0.2
+
+// Base IMU delay (milliseconds).  How old is pose before it is recorded?
+// Time is not reflected in the pose age.
+gIMUSensorPoseDelay = 0.0
+
+// Time (milliseconds) to get to Half Exposure on the display.
+// This usually T/2, but this property can be used to adjust for OLED vs LCD, getting to 3T/4, additional display delay time, etc.
+gTimeToHalfExposure = 8.33
+
+// Time (milliseconds) to adjust for midway between left and right eye warp.
+// The predicted time is to when the left eye will be warped. The right eye
+// will be warped T/2 later.  To minimize the warp on each eye, this difference
+// can be split between them. Fine tuning and other parameters can cause this
+// value to not be exactly T/2. Turn on "gLogPrediction" to evaluate
+gTimeToMidEyeWarp = 4.16
+
+// Max allowable predicted pose time (milliseconds)
+gMaxPredictedTime = 20.0
+gLogMaxPredictedTime = false
+
+// If using a heuristic approach to prediction
+gHeuristicPredictedTime = true
+
+// If heuristic approach, how many entries to average
+gNumHeuristicEntries = 25
+
+// May not want the heuristic values to be the exact first eye.
+// This time (milliseconds) is added to the predicted display time
+gHeuristicOffset = 0.0
+
+// Warp Mesh
+gWarpMeshType = 0      // 0 = Columns (Left To Right); 1 = Columns (Right To Left); 2 = Rows (Top To Bottom); 3 = Rows (Bottom To Top)
+gWarpMeshRows = 50
+gWarpMeshCols = 50
+gLayerMeshRows = 8
+gLayerMeshCols = 8
+gWarpEqrMeshRadius = 1.0
+gWarpEqrMeshScale = 1.0
+
+gWarpMeshMinX = -1.0f
+gWarpMeshMaxX = 1.0f
+gWarpMeshMinY = -1.0f
+gWarpMeshMaxY = 1.0f
+
+gMeshOffsetLeftX = 0.0
+gMeshOffsetLeftY = 0.0
+gMeshOffsetRightX = 0.0
+gMeshOffsetRightY = 0.0
+
+// Vignette
+gMeshVignette = false
+gVignetteRadius = 0.7
+
+// Warp Mesh discard UV value (Should be <= 1.0 or may see artifacts in image textures that don't have clamp to border)
+gMeshDiscardUV = 1.0
+
+// Clamp to Border
+gClampBorderEnabled = true
+gClampBorderColorR = 0.0
+gClampBorderColorG = 0.0
+gClampBorderColorB = 0.0
+gClampBorderColorA = 1.0
+
+gClampBorderOverlayEnabled = false
+gClampBorderOverlayColorR = 0.0
+gClampBorderOverlayColorG = 0.0
+gClampBorderOverlayColorB = 0.0
+gClampBorderOverlayColorA = 0.0
+
+// Stencil Mesh
+gStencilMeshEnabled = false
+gStencilMeshRadius = 0.95
+gStencilMeshColorR = 0.0
+gStencilMeshColorG = 0.0
+gStencilMeshColorB = 0.0
+gStencilMeshColorA = 1.0
+
+// Boundary System
+gEnableBoundarySystem = false
+gLogBoundarySystem = false
+
+gEnableBoundaryMesh = false
+gBoundaryWarpMeshRows = 2
+gBoundaryWarpMeshCols = 2
+gBoundaryZoneMinX = -1.5
+gBoundaryZoneMaxX = 1.5
+gBoundaryZoneMinY = -1.5
+gBoundaryZoneMaxY = 1.5
+gBoundaryZoneMinZ = -1.5
+gBoundaryZoneMaxZ = 1.5
+gBoundaryUVScale = 10.0
+gBoundaryGridWidth = 0.1
+gBoundaryVisabilityRadius = 0.5
+gBoundaryVisabilityScale = 5.0
+
+gBoundaryMeshColorR = 1.0
+gBoundaryMeshColorG = 1.0
+gBoundaryMeshColorB = 1.0
+gBoundaryMeshColorA = 0.5
+
+// Lens Parameters
+gLensOffsetX = 0.0
+gLensOffsetY = 0.0
+
+// Lens Distortion Polynomial: K0 + K1*r + K2*r^2 + K3*r^3 + K4*r^4 + K5*r^5 + K6*r^6
+// This provides a distortion scale
+gLensInverse = false
+
+gLensPolyK0 = 1.0 
+gLensPolyK1 = 0.0
+gLensPolyK2 = 0.1862
+gLensPolyK3 = 0.0
+gLensPolyK4 = 0.21
+gLensPolyK5 = 0.0
+gLensPolyK6 = 0.0238
+
+// Chromatic Aberration Correction: K0 + K1*r + K2*r^2 + K3*r^3 + K4*r^5 + K4*r^5 + K6*r^6
+// This is multiplied by the distortion scale calculated above
+gChromaticPolyK0_R = 0.989
+gChromaticPolyK1_R = 0.0
+gChromaticPolyK2_R = 0.0
+gChromaticPolyK3_R = 0.0
+gChromaticPolyK4_R = 0.0
+gChromaticPolyK5_R = 0.0
+gChromaticPolyK6_R = 0.0
+
+gChromaticPolyK0_G = 1.0
+gChromaticPolyK1_G = 0.0
+gChromaticPolyK2_G = 0.0
+gChromaticPolyK3_G = 0.0
+gChromaticPolyK4_G = 0.0
+gChromaticPolyK5_G = 0.0
+gChromaticPolyK6_G = 0.0
+
+gChromaticPolyK0_B = 1.0152
+gChromaticPolyK1_B = 0.0
+gChromaticPolyK2_B = 0.0
+gChromaticPolyK3_B = 0.0
+gChromaticPolyK4_B = 0.0
+gChromaticPolyK5_B = 0.0
+gChromaticPolyK6_B = 0.0
+
+gChromaticPixelBorder = 0.0
+
+// Warp Mesh discard UV value
+gMeshDiscardUV = 1.0
+
+//Logging Options
+gLogEyeOverSleep = false
+gLogSubmitFps = true
+gLogFrameDoubles = false
+gLogMeshCreation = false
+gLogRawSensorData = false
+gLogVSyncData = false
+gLogPoseVelocity = false
+gLogPrediction = false
+gMaxAngVel = 800.0
+gMaxLinearVel = 6.0
+gLogEyeRender = false
+gLogDroppedFrames = true
+gLogSubmitFrame = false
+
+//Debug Server
+gEnableDebugServer = false
+gDebugServerPort = 8080
+
+// Motion To Photon Test
+gMotionToPhotonC = 100.0
+gMotionToPhotonAccThreshold = 0.999998
+gLogLinePtrDelay = 0.0
+
+// Debug Fixed Rotation
+gUseFixedRotation = false
+gFixedRotationQuatX = 0.0
+gFixedRotationQuatY = 0.0
+gFixedRotationQuatZ = 0.0
+gFixedRotationQuatW = 1.0
+
+// Fixed rotation speed (Radians/second Euler Angles) subject to gUseFixedRotation
+gFixedRotationSpeedX = 0.0
+gFixedRotationSpeedY = 0.0
+gFixedRotationSpeedZ = 0.0
+
+// Debug Fixed Position
+gUseFixedPosition = false
+gFixedPositionX = 0.0
+gFixedPositionY = 0.0
+gFixedPositionZ = 0.0
+
+gControllerService = "com.qti.acg.apps.controllers.ximmerse/com.qti.acg.apps.controllers.ximmerse.XimmerseControllerService"
+
+// Motion Vectors
+gForceAppEnableMotionVectors = false
+gEnableYuvDecode = true
+gUseMotionVectors = true
+gWarpMotionVectors = true 
+gWarpMotionScale = -1.0
+gLogMotionVectors = false
+gLogThreadState = false
+gMotionVectorScale = 0.5
+gMotionInterpolationFactor = 0.5
+gSmoothMotionVectors = true
+gSmoothMotionVectorsWithGPU = false
+gRenderMotionVectors = false
+gRenderMotionInput = false
+gGenerateBothEyes = false

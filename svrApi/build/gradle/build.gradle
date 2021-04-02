@@ -1,0 +1,154 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/google/' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter/'}
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.0'
+    }
+}
+
+allprojects {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/google/' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter/'}
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+android {
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+    defaultConfig {
+        minSdkVersion 26
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+		externalNativeBuild {
+			ndkBuild {
+				targets "svrapi"
+				arguments '-j6'
+			}
+		}
+    }
+    
+    flavorDimensions "abi"
+    
+    // this method results in 32-bit version of the binaries being built twice.
+    // TODO: should upgrade this method to make a copy of v8a aar and unzip it and remove
+    // 32-bit version of the libraries from it and package it back to an aar.
+    productFlavors {
+        v7a {
+            dimension "abi"
+            ndk {
+                abiFilters 'armeabi-v7a'
+            }
+        }
+        v8a{
+            dimension "abi"
+            ndk {
+                abiFilters 'armeabi-v7a', 'arm64-v8a'
+            }
+        }
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable = true
+            jniDebuggable = true
+        }
+    }
+    sourceSets {
+        main {
+            jni.srcDirs = ['../../jni']
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = [
+                    '../../private/java',
+                    '../../private/SvrControllerUtil/java']
+            aidl.srcDirs = [
+                    '../../private/aidl',
+                    '../../private/SvrControllerUtil/aidl']
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path '../../jni/Android.mk'
+        }
+    }
+    
+    android {
+      lintOptions {
+          abortOnError false
+      }
+    }
+    
+    libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            if( output.outputFile.name.contains("v8a"))
+            outputFileName = output.outputFile.name.replace("v8a-", "")
+        }
+    }
+}
+
+
+// TODO: do we need this anymore ? 
+// Apps should reference the aar's in build/outputs/aar/
+task importaar {
+    outputs.upToDateWhen { false }
+    doLast {
+        copy {
+            from("${buildDir}/outputs/aar/")
+            into '../../libs/'
+            include '**/*.aar'
+        }
+    }
+}
+
+task extractReleaseSo {
+    dependsOn 'assembleRelease'
+    doLast {
+        copy {
+            def releaseFile = new File("../../libs/svrApi-v8a-release.aar")
+            if (releaseFile.exists()) {
+                from zipTree(releaseFile)
+                into "../../libs/release"
+                include "jni/**/*.so"
+            }
+        }
+    }
+}
+
+task extractDebugSo {
+    dependsOn 'assembleDebug'
+    doLast {
+        copy {
+            def debugFile = new File("${buildDir}/outputs/aar/svrApi-v8a-debug.aar")
+            if (debugFile.exists()) {
+                from zipTree(debugFile)
+                into "../../libs/debug"
+                include "jni/**/*.so"
+            }
+        }
+    }
+}
+
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDebug') {
+        task.finalizedBy(importaar)
+        task.finalizedBy(extractDebugSo)
+    } else if (task.name == 'assembleRelease') {
+        task.finalizedBy(importaar)
+        task.finalizedBy(extractReleaseSo)
+    }
+    task.finalizedBy(importaar)
+}
