@@ -3,20 +3,21 @@
 //
 
 #include "CpuTimer.h"
+#include <time.h>
 
-namespace ShadowCreator {
+namespace Vera {
     CpuTimer *CpuTimer::getInstance() {
         static CpuTimer cpuTimer;
         return &cpuTimer;
     }
 
-    Nanoseconds CpuTimer::getNanoTimestamp() {
+    uint64_t CpuTimer::getNanoTimestamp() {
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
-        return (Nanoseconds) now.tv_sec * 1000ULL * 1000ULL * 1000ULL + now.tv_nsec;
+        return (uint64_t) now.tv_sec * 1000ULL * 1000ULL * 1000ULL + now.tv_nsec;
     }
 
-    void CpuTimer::sleep(Nanoseconds sleepTimeNano) {
+    void CpuTimer::sleep(uint64_t sleepTimeNano) {
         timespec t, rem;
         t.tv_sec = 0;
         t.tv_nsec = sleepTimeNano;

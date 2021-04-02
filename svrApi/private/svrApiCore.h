@@ -39,11 +39,16 @@
 
 #include "QVRCameraClient.h"
 
+#include "slam/InvisionCameraHelper.h"
 #include "slam/InvisionSlamClient.h"
 #include "gesture/InvisionGestureClient.h"
 #include "handshank/HandShankHelper.h"
 #include "slam/A11GDeviceHelper.h"
 #define NUM_SWAP_FRAMES 5
+
+#include "utils/VeraSignal.h"
+#include "utils/CpuTimer.h"
+#include <thread>
 
 namespace Svr {
     struct svrFrameParamsInternal {
@@ -139,6 +144,7 @@ namespace Svr {
         // add by chenweihua 20201026 (start)
         handshank_client_helper_t * ivhandshankHelper = nullptr;
         std::vector<HandShank_IMUDATA> handshank_imu;
+        int bond = 0;
         // add by chenweihua 20201026 (end)
 
         SvrServiceClient *svrServiceClient;
@@ -151,7 +157,28 @@ namespace Svr {
 
         bool inVrMode;
         bool mUseIvSlam;
-        bool mTrackingDataLost;
+
+        qvrcamera_client_helper_t *qvrCameraClient = nullptr;
+        qvrcamera_device_helper_t *qvrDeviceClient = nullptr;
+        int qvrCameraApiVersion = 0;
+        uint16_t cameraWidth = 0;
+        uint16_t cameraHeight = 0;
+        std::mutex cameraMutex;
+        std::thread qvrCameraThread;
+        Vera::VeraSignal qvrCameraStartSignal{false};
+        Vera::VeraSignal qvrCameraTerminalSignal{false};
+        int newCameraBufferIdx = -1;
+        int availableCameraBufferIdx = -1;
+
+        bool useTransformMatrix = false;
+        glm::mat4 transformMatrixArray[2];
+        glm::quat correctYQuat;
+    };
+
+    struct CameraFrameData {
+        uint8_t *dataArray = nullptr;
+        uint32_t frameIndex = 0;
+        uint64_t exposureNano = 0;
     };
 
     extern SvrAppContext *gAppContext;

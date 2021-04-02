@@ -1,14 +1,10 @@
-//
-// Created by willie on 2019/12/30.
-//
-
 #ifndef SC_LAYER_FETCHER_H
 #define SC_LAYER_FETCHER_H
 
 #include <Common.h>
 #include <vector>
 #include <unordered_map>
-#include "InVisionMutex.h"
+#include <mutex>
 #include <android/hardware_buffer.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -18,7 +14,7 @@
 
 using namespace Svr;
 
-namespace ShadowCreator {
+namespace UnityLauncher {
     struct LayerData {
         int layerId;
         int parentLayerId;
@@ -48,17 +44,9 @@ namespace ShadowCreator {
 
         int init();
 
-        int fetchingLayer();
-
-        int releaseSocket();
-
-        int sendConnectionSocket(float *viewMatrixArray);
-
         std::vector<uint8_t *> *getLayerData();
 
-//        std::vector<int> *getLayerDataSize();
-
-        InVisionMutex *getDataMutex();
+        std::mutex *getDataMutex();
 
         std::vector<AHardwareBuffer *> *getHardwareBufferVector();
 
@@ -68,11 +56,7 @@ namespace ShadowCreator {
 
         std::unordered_map<uint32_t, EGLImageKHR> *getEGLImageMap();
 
-//        std::unordered_map<uint32_t, glm::mat4> *getModelMatrixMap();
-
         std::unordered_map<uint32_t, LayerData> *getLayerDataMap();
-
-        int setSocketBlockingMode(int socketFd, bool bBlocking);
 
         invisionsf_client_helper_t *helper;
 
@@ -89,31 +73,16 @@ namespace ShadowCreator {
         void printGlmMat4(const char *matName, glm::mat4 &mat4);
 
     private:
-        int saveHardwareBuffer(AHardwareBuffer *hardwareBuffer, uint32_t layerId);
-
-        int receiveLayerId();
-
-        int receiveLayerData();
-
-        void receiveLayerHardwareBuffer();
-
-    private:
         int mErrorCode = 0;
-        int mSocketFd = 0;
         std::vector<uint8_t *> mLayerDataVector;
-//        std::vector<int> mLayerDataSizeVector;
-        InVisionMutex mDataMutex;
+        std::mutex mDataMutex;
 
-        AHardwareBuffer *mHardwareBuffer = nullptr;
-        uint64_t mFetchCount = 0;
         std::vector<AHardwareBuffer *> mHardwareBufferVector;
         std::vector<EGLImageKHR> mEGLImageVector;
         std::unordered_map<uint32_t, AHardwareBuffer *> mHardwareBufferMap;
         std::unordered_map<uint32_t, EGLImageKHR> mEGLImageMap;
-//        std::unordered_map<uint32_t, glm::mat4> mModelMatrixMap;
         std::unordered_map<uint32_t, LayerData> mLayerDataMap;
         EGLDisplay mEGLDisplay;
-        bool mBConnected = false;
         EGLint mEglImageAttrs[11] = {0};
         uint32_t mLayerId = 0;
     };

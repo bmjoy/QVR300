@@ -109,7 +109,7 @@ typedef struct qvrcamera_frame
     uint32_t fn;
     uint64_t start_of_exposure_ts;
     uint32_t exposure;
-    volatile uint8_t* buffer;
+    uint8_t* buffer;
     uint32_t len;
     uint32_t width;
     uint32_t height;

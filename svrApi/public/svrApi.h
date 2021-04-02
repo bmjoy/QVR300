@@ -138,6 +138,9 @@ struct svrHeadPose
 {
     svrQuaternion   rotation;
     svrVector3      position;
+    float rawQuaternion[4];
+    float rawPosition[3];
+    uint64_t rawTS;
 };
 
 //! \brief Enum used to indicate valid components of an pose state
@@ -201,8 +204,8 @@ struct svrEyePoseState
 enum svrPerfLevel
 {
     kPerfSystem     = 0,            //!< System defined performance level (default)
-    kPerfMinimum    = 1,            //!< Minimum performance level 
-    kPerfMedium     = 2,            //!< Medium performance level 
+    kPerfMinimum    = 1,            //!< Minimum performance level
+    kPerfMedium     = 2,            //!< Medium performance level
     kPerfMaximum    = 3,            //!< Maximum performance level
     kNumPerfLevels
 };
@@ -232,7 +235,7 @@ enum svrFrameOption
 {
     kDisableDistortionCorrection    = ( 1 << 0 ),   //!< Disables the lens distortion correction (useful for debugging)
     kDisableReprojection            = ( 1 << 1 ),   //!< Disables re-projection
-    kEnableMotionToPhoton           = ( 1 << 2 ),   //!< Enables motion to photon testing 
+    kEnableMotionToPhoton           = ( 1 << 2 ),   //!< Enables motion to photon testing
     kDisableChromaticCorrection     = ( 1 << 3 )   //!< Disables the lens chromatic aberration correction (performance optimization)
 };
 
@@ -329,7 +332,7 @@ struct svrFrameParams
     svrRenderLayer      renderLayers[SVR_MAX_RENDER_LAYERS];    //!< Description of each render layer
 
     uint32_t            frameOptions;                           //!< Options for adjusting the frame warp behavior (bitfield of svrFrameOption)
-    svrHeadPoseState    headPoseState;                          //!< Head pose state used to generate the frame  
+    svrHeadPoseState    headPoseState;                          //!< Head pose state used to generate the frame
     svrWarpType         warpType;                               //!< Type of warp to be used on the frame
     float               fieldOfView;                            //!< Field of view used to generate this frame (larger than device fov to provide timewarp margin)
 };
@@ -438,72 +441,72 @@ enum svrControllerConnectionState {
 
 //! Controller Touch button enumerations
 namespace svrControllerTouch {
-    enum {
-        None                = 0x00000000,
-        One                 = 0x00000001,
-        Two                 = 0x00000002,
-        Three               = 0x00000004,
-        Four                = 0x00000008,
-        PrimaryThumbstick   = 0x00000010,
-        SecondaryThumstick  = 0x00000020,
-        Any                 = ~None
-    };
+  enum {
+    None                = 0x00000000,
+    One                 = 0x00000001,
+    Two                 = 0x00000002,
+    Three               = 0x00000004,
+    Four                = 0x00000008,
+    PrimaryThumbstick   = 0x00000010,
+    SecondaryThumstick  = 0x00000020,
+    Any                 = ~None
+  };
 }
 
 //! Controller Trigger enumerations
 namespace svrControllerAxis1D {
-    enum {
-        PrimaryIndexTrigger   = 0x00000000,
-        SecondaryIndexTrigger = 0x00000001,
-        PrimaryHandTrigger    = 0x00000002,
-        SecondaryHandTrigger  = 0x00000003
-    };
+enum {
+  PrimaryIndexTrigger   = 0x00000000,
+  SecondaryIndexTrigger = 0x00000001,
+  PrimaryHandTrigger    = 0x00000002,
+  SecondaryHandTrigger  = 0x00000003
+};
 }
 
 //! Controller Joystick enumerations
 namespace svrControllerAxis2D {
-    enum {
-        PrimaryThumbstick     = 0x00000000,
-        SecondaryThumbstick   = 0x00000001
-    };
+enum {
+  PrimaryThumbstick     = 0x00000000,
+  SecondaryThumbstick   = 0x00000001
+};
 }
 
 //! Controller Button enumerations
 namespace svrControllerButton {
-    enum {
-        None                    = 0x00000000,
-        One                     = 0x00000001,
-        Two                     = 0x00000002,
-        Three                   = 0x00000004,
-        Four                    = 0x00000008,
-        DpadUp                  = 0x00000010,
-        DpadDown                = 0x00000020,
-        DpadLeft                = 0x00000040,
-        DpadRight               = 0x00000080,
-        Start                   = 0x00000100,
-        Back                    = 0x00000200,
-        PrimaryShoulder         = 0x00001000,
-        PrimaryIndexTrigger     = 0x00002000,
-        PrimaryHandTrigger      = 0x00004000,
-        PrimaryThumbstick       = 0x00008000,
-        PrimaryThumbstickUp     = 0x00010000,
-        PrimaryThumbstickDown   = 0x00020000,
-        PrimaryThumbstickLeft   = 0x00040000,
-        PrimaryThumbstickRight  = 0x00080000,
-        SecondaryShoulder       = 0x00100000,
-        SecondaryIndexTrigger   = 0x00200000,
-        SecondaryHandTrigger    = 0x00400000,
-        SecondaryThumbstick     = 0x00800000,
-        SecondaryThumbstickUp   = 0x01000000,
-        SecondaryThumbstickDown = 0x02000000,
-        SecondaryThumbstickLeft = 0x04000000,
-        SecondaryThumbstickRight = 0x08000000,
-        Up                      = 0x10000000,
-        Down                    = 0x20000000,
-        Left                    = 0x40000000,
-        Right                   = 0x80000000,
-        Any                     = ~None
-    };
+enum {
+  None                    = 0x00000000,
+  One                     = 0x00000001,
+  Two                     = 0x00000002,
+  Three                   = 0x00000004,
+  Four                    = 0x00000008,
+  DpadUp                  = 0x00000010,
+  DpadDown                = 0x00000020,
+  DpadLeft                = 0x00000040,
+  DpadRight               = 0x00000080,
+  Start                   = 0x00000100,
+  Back                    = 0x00000200,
+  PrimaryShoulder         = 0x00001000,
+  PrimaryIndexTrigger     = 0x00002000,
+  PrimaryHandTrigger      = 0x00004000,
+  PrimaryThumbstick       = 0x00008000,
+  PrimaryThumbstickUp     = 0x00010000,
+  PrimaryThumbstickDown   = 0x00020000,
+  PrimaryThumbstickLeft   = 0x00040000,
+  PrimaryThumbstickRight  = 0x00080000,
+  SecondaryShoulder       = 0x00100000,
+  SecondaryIndexTrigger   = 0x00200000,
+  SecondaryHandTrigger    = 0x00400000,
+  SecondaryThumbstick     = 0x00800000,
+  SecondaryThumbstickUp   = 0x01000000,
+  SecondaryThumbstickDown = 0x02000000,
+  SecondaryThumbstickLeft = 0x04000000,
+  SecondaryThumbstickRight = 0x08000000,
+  Up                      = 0x10000000,
+  Down                    = 0x20000000,
+  Left                    = 0x40000000,
+  Right                   = 0x80000000,
+  Any                     = ~None
+};
 }
 
 // Current state of the controller
@@ -564,7 +567,7 @@ struct svrControllerCaps {
 };
 
 #ifndef SVRP_EXPORT
-#define SVRP_EXPORT
+    #define SVRP_EXPORT
 #endif
 
 #ifdef __cplusplus
@@ -615,11 +618,12 @@ SVRP_EXPORT float svrGetPredictedDisplayTimePipelined(unsigned int depth);
 //! \param predictedTimeMs Time ahead of the current time in ms to predict a head pose for
 //! \return The predicted head pose and relevant pose state information
 SVRP_EXPORT svrHeadPoseState svrGetPredictedHeadPose( float predictedTimeMs );
+SVRP_EXPORT svrHeadPoseState svrGetPredictedHeadPoseExt( float predictedTimeMs, bool virHandGesture);
 
 //! \brief Retrieves a historic head pose
 //! \param predictedTimeMs Time in ns to retrieve a head pose for
 //! \return The head pose and relevant pose state information
-SVRP_EXPORT svrHeadPoseState svrGetHistoricHeadPose(int64_t timestampNs);
+SVRP_EXPORT svrHeadPoseState svrGetHistoricHeadPose(int64_t timestampNs, bool bLoadCalibration=false);
 
 //! \brief Retrieves a current eye pose
 //! \return The eye pose
@@ -738,49 +742,17 @@ SVRP_EXPORT SvrResult svrGetBoundaryParameters(float *pMinValues, float *pMaxVal
 
 SVRP_EXPORT int svrGetPointCloudData(int &outNum, uint64_t &outTimestamp, float *outDataArray);
 
-// willie change start 2020-2-23
-struct SCSingleLayerData {
-    uint32_t layerId;
-    uint32_t parentLayerId;
-    uint32_t layerTextureId;
-    float modelMatrixData[16];
-    uint32_t editFlag;
-    int z;
-    float vertexPosition[12];
-    float vertexUV[8];
-    float alpha;
-    bool bOpaque;
-    uint32_t taskId;
-};
+SVRP_EXPORT float svrFetchDeflection();
 
-struct SCAllLayers {
-    uint32_t layerNum;
-    float viewMatrixData[16];
-    SCSingleLayerData *layerData = nullptr;
-};
-
-SVRP_EXPORT int scInitLayer();
-
-SVRP_EXPORT int scStartLayerRendering();
-
-SVRP_EXPORT int scGetAllLayersData(SCAllLayers *outAllLayers);
-
-SVRP_EXPORT int scEndLayerRendering(SCAllLayers *allLayers);
-
-SVRP_EXPORT int scUpdateModelMatrix(uint32_t layerId, float *modelMatrixArray);
-
-SVRP_EXPORT int scSendActionBarCMD(uint32_t layerId, int cmd);
-
-SVRP_EXPORT int scInjectMotionEvent(uint32_t layerId, int displayID,int action,float x,float y);
-
-SVRP_EXPORT int scDestroyLayer();
+// willie change start 2020-8-20
+SVRP_EXPORT void svrUpdateRelativeDeflection(int deflection);
+// willie change end 2020-8-20
 
 SVRP_EXPORT int scGetOfflineMapRelocState();
 
 SVRP_EXPORT void scResaveMap(const char *path);
-// willie change end 2020-2-23
 
-SVRP_EXPORT bool isTrackingDataLost();  //add zengchuiguo 20200708
+SVRP_EXPORT void scGetGnss(double &dt, float *gnss);
 
 SVRP_EXPORT int scGetPanel();
 
@@ -820,6 +792,10 @@ SVRP_EXPORT void scHandShank_LedControl(int enable);
 
 SVRP_EXPORT void scHandShank_VibrateControl(int value);
 
+SVRP_EXPORT int scFetchHandShank(float *orientationArray, int lr);
+
+SVRP_EXPORT int scFetch3dofHandShankNew(float *orientationArray, int lr);
+
 SVRP_EXPORT int scFetch3dofHandShank(float *orientationArray, int lr);
 
 SVRP_EXPORT int scFetch6dofHandShank(float *orientationArray, int lr);
@@ -841,6 +817,62 @@ SVRP_EXPORT void scHANDTRACK_SetGestureCallback(GESTURE_CHANGE_CALLBACK callback
 SVRP_EXPORT void scHANDTRACK_SetGestureModelDataCallback(GESTURE_MODEL_DATA_CHANGE_CALLBACK callback);
 SVRP_EXPORT void scHANDTRACK_SetLowPowerWarningCallback(LOW_POWER_WARNING_CALLBACK callback);
 //add zengchuiguo 20200724 (end)
+
+SVRP_EXPORT SvrResult svrGetLatestCameraDataForUnity(bool &outBUpdate, uint32_t &outFrameIndex,
+        uint64_t &outFrameExposureNano, uint8_t *outFrameData, float *outTRDataArray);
+
+
+SVRP_EXPORT SvrResult svrGetLatestCameraDataForUnityNoTransform(bool &outBUpdate, uint32_t &outFrameIndex,
+        uint64_t &outFrameExposureNano, uint8_t *outFrameData, float *outTRDataArray);
+
+SVRP_EXPORT SvrResult svrGetTransformMatrix(bool &outBLoaded, float *outTransformArray);
+
+SVRP_EXPORT svrHeadPoseState svrGetLatestEyeMatrices(float *outLeftEyeMatrix, float *outRightEyeMatrix, float *outT, float *outR, float predictedTimeMs);
+
+SVRP_EXPORT SvrResult svrGetLatestCameraBinocularData(bool &outBUpdate, uint32_t &outFrameIndex,
+                                                      uint64_t &outFrameExposureNano,
+                                                      uint8_t *outLeftFrameData,
+                                                      uint8_t *outRightFrameData);
+
+// willie change start 2020-2-23
+struct SCSingleLayerData {
+    uint32_t layerId;
+    uint32_t parentLayerId;
+    uint32_t layerTextureId;
+    float modelMatrixData[16];
+    uint32_t editFlag;
+    int z;
+    float vertexPosition[12];
+    float vertexUV[8];
+    float alpha;
+    bool bOpaque;
+    uint32_t taskId;
+};
+
+struct SCAllLayers {
+    uint32_t layerNum;
+    float viewMatrixData[16];
+    SCSingleLayerData *layerData = nullptr;
+};
+
+SVRP_EXPORT int scInitLayer();
+
+SVRP_EXPORT int scStartLayerRendering();
+
+SVRP_EXPORT int scGetAllLayersData(SCAllLayers *outAllLayers);
+
+SVRP_EXPORT int scEndLayerRendering(SCAllLayers *allLayers);
+
+SVRP_EXPORT int scUpdateModelMatrix(uint32_t layerId, float *modelMatrixArray);
+
+SVRP_EXPORT int scSendActionBarCMD(uint32_t layerId, int cmd);
+
+SVRP_EXPORT int scInjectMotionEvent(uint32_t layerId, int displayID,int action,float x,float y);
+
+SVRP_EXPORT int scDestroyLayer();
+// willie change end 2020-2-23
+
+SVRP_EXPORT bool scEnableDebugWithProperty();
 
 #ifdef __cplusplus
 }

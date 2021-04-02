@@ -1,0 +1,10 @@
+//
+// Created by zengchuiguo on 7/30/2020.
+//
+
+#ifndef SVRAPI_INVISIONVERSION_H
+#define SVRAPI_INVISIONVERSION_H
+
+#define INVISION_SVR_VERSION    "SVR_APP_V1.1.0_20210303"
+
+#endif //SVRAPI_INVISIONVERSION_H

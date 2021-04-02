@@ -16,9 +16,10 @@
 
 #define VERBOSE_LOGGING_ENABLED 0
 
-#define LOGE(...) __android_log_print( ANDROID_LOG_ERROR, "svr", __VA_ARGS__ )
-#define LOGI(...) __android_log_print( ANDROID_LOG_INFO, "svr", __VA_ARGS__ )
-#define LOGW(...) __android_log_print( ANDROID_LOG_WARN, "svr", __VA_ARGS__ )
+#define LOGE(...) __android_log_print( ANDROID_LOG_ERROR, "svr-app", __VA_ARGS__ )
+#define LOGI(...) __android_log_print( ANDROID_LOG_INFO, "svr-app", __VA_ARGS__ )
+#define LOGW(...) __android_log_print( ANDROID_LOG_WARN, "svr-app", __VA_ARGS__ )
+#define LOGZ(...) __android_log_print( ANDROID_LOG_WARN, "svr-zcg", __VA_ARGS__ )
 
 #if defined(NDEBUG) || !VERBOSE_LOGGING_ENABLED
 #define LOGV(...)

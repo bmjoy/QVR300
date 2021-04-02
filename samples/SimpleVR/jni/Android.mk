@@ -18,10 +18,17 @@ SVR_FRAMEWORK_SRC_PATH := $(SVR_ROOT_PATH)/samples/SimpleVR/jni
 
 APP_COMMON_PATH := $(LOCAL_PATH)/../../common
 
+# Use this to enable/disable debug with property
+ALLOW_DEBUG_WITH_PROPERTY := false
+
 include $(APP_COMMON_PATH)/SvrApi.mk
 
 include $(CLEAR_VARS)
 include $(APP_COMMON_PATH)/Framework.mk
+
+ifeq ($(ALLOW_DEBUG_WITH_PROPERTY),true)
+	LOCAL_CFLAGS += -DDEBUG_WITH_PROPERTY
+endif
 
 LOCAL_MODULE    := simple
 LOCAL_SRC_FILES += $(SVR_ROOT_PATH)/samples/SimpleVR/jni/app.cpp

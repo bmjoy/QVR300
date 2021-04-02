@@ -82,7 +82,7 @@
 #include <unistd.h>
 #include "app.h"
 
-#include "ARCORE_API.h"
+//#include "ARCORE_API.h"
 #include "dlfcn.h"
 #include <sys/system_properties.h>
 
@@ -91,7 +91,7 @@ using namespace Svr;
 #define MODEL_POSITION_RADIUS 4.0f
 #define BUFFER_SIZE 512
 #define ROTATION_SPEED 5.0f
-#define INVISION_SLAM_LIB "libuvc_native.so"
+//#define INVISION_SLAM_LIB "libuvc_native.so"
 bool mUpdateAnchor = false;
 bool mUpdatePlan = false;
 SimpleApp::SimpleApp() {
@@ -99,14 +99,14 @@ SimpleApp::SimpleApp() {
     mModelTexture = 0;
     mPlaneRender = new PlaneRender();
     mCubeRender = new CubeRender();
-    libHandle = dlopen(INVISION_SLAM_LIB, RTLD_NOW);
-
-    typedef int (*ivslam_getplan_fn)(int x, int y, float &A, float &B, float &C, float &pointX,
-                                     float &pointY, float &pointZ);
-    ivslam_getplan = (ivslam_getplan_fn) dlsym(libHandle, "ARCORE_get_plane");
-
-    typedef int (*ivslam_getanchor_fn)(float &pointX,float &pointY, float &pointZ);
-    ivslam_getanchor = (ivslam_getanchor_fn) dlsym(libHandle, "ARCORE_get_anchor");
+//    libHandle = dlopen(INVISION_SLAM_LIB, RTLD_NOW);
+//
+//    typedef int (*ivslam_getplan_fn)(int x, int y, float &A, float &B, float &C, float &pointX,
+//                                     float &pointY, float &pointZ);
+//    ivslam_getplan = (ivslam_getplan_fn) dlsym(libHandle, "ARCORE_get_plane");
+//
+//    typedef int (*ivslam_getanchor_fn)(float &pointX,float &pointY, float &pointZ);
+//    ivslam_getanchor = (ivslam_getanchor_fn) dlsym(libHandle, "ARCORE_get_anchor");
 
 }
 
@@ -200,35 +200,33 @@ void SimpleApp::Update() {
     //base class Update
     SvrApplication::Update();
 
-if(mUpdateAnchor) {
-    LOGI("@@@ mReceiveBoardCast = true ");
-    if (mFindPlane) {
-        int anchorRes = ivslam_getanchor(anchorX, anchorY, anchorZ);
-        if (anchorRes == 0) {
-            mCubeRender->updateCubePosition(anchorY, anchorZ, anchorX);
-        }
-    }
-    mUpdateAnchor = false;
-}
-if(mUpdatePlan){
-        int res = ivslam_getplan(320, 240, A, B, C, X, Y, Z);
-        LOGI("@@@ res = %d,A,B,C,X,Y,Z = %f,%f,%f,%f,%f,%f", res, A, B, C, X, Y, Z);
-        if (res == 0) {
-            mPlaneRender->setPlanInfo(B, C, A, Y, Z, X);
-            mFindPlane = true;
-            mCubeRender->setFindPlan(true);
-        }
-    mUpdatePlan = false;
-}
+//if(mUpdateAnchor) {
+//    LOGI("@@@ mReceiveBoardCast = true ");
+//    if (mFindPlane) {
+//        int anchorRes = ivslam_getanchor(anchorX, anchorY, anchorZ);
+//        if (anchorRes == 0) {
+//            mCubeRender->updateCubePosition(anchorY, anchorZ, anchorX);
+//        }
+//    }
+//    mUpdateAnchor = false;
+//}
+//if(mUpdatePlan){
+//        int res = ivslam_getplan(320, 240, A, B, C, X, Y, Z);
+//        LOGI("@@@ res = %d,A,B,C,X,Y,Z = %f,%f,%f,%f,%f,%f", res, A, B, C, X, Y, Z);
+//        if (res == 0) {
+//            mPlaneRender->setPlanInfo(B, C, A, Y, Z, X);
+//            mFindPlane = true;
+//            mCubeRender->setFindPlan(true);
+//        }
+//    mUpdatePlan = false;
+//}
 
 
 
 
     //update view matrix
-    //float predDispTime = svrGetPredictedDisplayTime();
-    float value = 0;
-    //__system_property_get("persist.debug_useivslam", value);
-    mPoseState = svrGetPredictedHeadPose(value);
+    float predDispTime = svrGetPredictedDisplayTime();
+    mPoseState = svrGetPredictedHeadPose(predDispTime);
     SvrGetEyeViewMatrices(mPoseState, true,
                           DEFAULT_IPD, DEFAULT_HEAD_HEIGHT, DEFAULT_HEAD_DEPTH, mViewMatrix[kLeft],
                           mViewMatrix[kRight]);

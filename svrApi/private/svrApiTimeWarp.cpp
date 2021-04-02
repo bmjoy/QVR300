@@ -479,6 +479,7 @@ VAR(float, gChromaticPixelBorder,
 
 VAR(float, gPreTwistRatio, 1.0f, kVariableNonpersistent);
 VAR(float, gPreTwistRatioY, 1.0f, kVariableNonpersistent);
+VAR(int, gPreTwistRatioMode, 0, kVariableNonpersistent);
 
 // Warp Mesh discard UV value
 VAR(float, gMeshDiscardUV,
@@ -567,6 +568,8 @@ EXTERN_VAR(float, gExtraAdjustPeriodRatio);
 EXTERN_VAR(bool, gDisablePredictedTime);
 
 EXTERN_VAR(bool, gHeuristicPredictedTime);
+
+EXTERN_VAR(bool, gDebugWithProperty);
 
 // External value from config file in svrApiPredictiveSensor
 extern int gSensorHomePosition;
@@ -3426,6 +3429,13 @@ bool L_CompileOneWarpShader(uint32_t whichShader)
         fragShaderStrings[numFragStrings++] = UBER_CUBEMAP_STRING;
     }
 
+    if (pWarpData->pWarpShaderMap[whichShader] & kWarpARDevice) {
+        vertShaderStrings[numVertStrings++] = WILLIE_AR_STRING;
+        LOGI("willie_test L_CompileOneWarpShader whichShader=%d has kWarpARDevice");
+    } else {
+        LOGI("willie_test L_CompileOneWarpShader whichShader=%d NOT have kWarpARDevice");
+    }
+
     vertShaderStrings[numVertStrings++] = warpShaderVs;
     fragShaderStrings[numFragStrings++] = warpShaderFs;
 
@@ -3671,6 +3681,7 @@ bool InitializeAsyncWarpData(SvrAsyncWarpResources *pWarpData)
                     // Base Version
                     kWarpChroma,
                     kWarpChroma | kWarpVignette,
+                    kWarpChroma | kWarpARDevice,
 
                     kWarpImage | kWarpChroma,
                     kWarpImage | kWarpChroma | kWarpVignette,
@@ -5170,6 +5181,10 @@ L_GetLayerShader(svrFrameParamsInternal *pWarpFrame, uint32_t whichLayer, svrEye
         paramFlag &= ~kEnableTexWarpMatrix;
     }
 
+    if (gDisableLensCorrection) {
+        shaderMask |= kWarpARDevice;
+    }
+
 #ifdef ENABLE_MOTION_VECTORS
     // Special handling if rendering the motion engine input
     if (gRenderMotionVectors && gRenderMotionInput && gpMotionData != NULL)
@@ -5985,21 +6000,6 @@ float L_MilliSecondsSinceVrStart()
     return diffTimeMs;
 }
 
-    void printGlmMat4(const char *matName, glm::mat4 *mat4) {
-        LOGI("%s = [%f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f]", matName,
-             (*mat4)[0][0], (*mat4)[1][0], (*mat4)[2][0], (*mat4)[3][0],
-             (*mat4)[0][1], (*mat4)[1][1], (*mat4)[2][1], (*mat4)[3][1],
-             (*mat4)[0][2], (*mat4)[1][2], (*mat4)[2][2], (*mat4)[3][2],
-             (*mat4)[0][3], (*mat4)[1][3], (*mat4)[2][3], (*mat4)[3][3]);
-    }
-
-    void printGlmMat4(const char *matName, glm::mat4 &mat4) {
-        LOGI("%s = [%f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f]", matName,
-             mat4[0][0], mat4[1][0], mat4[2][0], mat4[3][0],
-             mat4[0][1], mat4[1][1], mat4[2][1], mat4[3][1],
-             mat4[0][2], mat4[1][2], mat4[2][2], mat4[3][2],
-             mat4[0][3], mat4[1][3], mat4[2][3], mat4[3][3]);
-    }
 //-----------------------------------------------------------------------------
 void *WarpThreadMain(void *arg)
 //-----------------------------------------------------------------------------
@@ -6505,7 +6505,10 @@ void *WarpThreadMain(void *arg)
                       gAppContext->modeContext->warpRenderSurfaceHeight));
         L_SetSurfaceScissor(kEntire);
 
-        glm::mat4 eyeProjectionMatrix = glm::mat4(1);
+        glm::mat4 eyeProjectionMatrix = CalculateProjectionMatrix();
+        if (gDisableLensCorrection) {
+            eyeProjectionMatrix = glm::mat4(1);
+        }
 
         glm::fquat displayQuat, vsyncStartQuat, vsyncEndQuat;
 
@@ -6519,7 +6522,9 @@ void *WarpThreadMain(void *arg)
 //        }
 
         glm::mat4 leftWarpMatrix = glm::mat4(1.0f);
-        leftWarpMatrix[3][2] = 1.0f;
+        if (gDisableLensCorrection) {
+            leftWarpMatrix[3][2] = 1.0f;
+        }
         float deltaYaw = 0;
         float deltaPitch = 0;
         PROFILE_ENTER(GROUP_TIMEWARP, 0, "Left Eye - Pose Update");
@@ -6533,6 +6538,7 @@ void *WarpThreadMain(void *arg)
                     timeToVsyncMs + (1000.0f / gAppContext->deviceInfo.displayRefreshRateHz));
 
             svrHeadPoseState displayPoseState = svrGetPredictedHeadPose(adjustedTimeMs);
+            svrHeadPoseState nextDisplayPoseState = svrGetPredictedHeadPose(adjustedTimeMs + (1000.0f / gAppContext->deviceInfo.displayRefreshRateHz));
 
             origQuat = glmQuatFromSvrQuat(pWarpFrame->frameParams.headPoseState.pose.rotation);
 
@@ -6540,6 +6546,24 @@ void *WarpThreadMain(void *arg)
             vsyncEndQuat = glmQuatFromSvrQuat(vsyncEndPoseState.pose.rotation);
 
             displayQuat = glmQuatFromSvrQuat(displayPoseState.pose.rotation);
+            glm::quat nextDisplayQuat = glmQuatFromSvrQuat(nextDisplayPoseState.pose.rotation);
+            glm::mat4 nextDisplayR = glm::mat4_cast(nextDisplayQuat);
+
+            if (gDebugWithProperty) {
+                char value[20] = {0x00};
+                __system_property_get("svr.preTwist", value);
+                if ('\0' != value[0]) {
+                    gPreTwistRatioMode = atoi(value);
+                }
+                __system_property_get("svr.gPreTwistRatio", value);
+                if ('\0' != value[0]) {
+                    gPreTwistRatio = atof(value);
+                }
+                __system_property_get("svr.gPreTwistRatioY", value);
+                if ('\0' != value[0]) {
+                    gPreTwistRatioY = atof(value);
+                }
+            }
 
             if (gMeshOrderEnum == kMeshOrderTopToBottom ||
                 gMeshOrderEnum == kMeshOrderBottomToTop) {
@@ -6547,6 +6571,11 @@ void *WarpThreadMain(void *arg)
                     glm::mat4 currR = glm::mat4_cast(displayQuat);
                     if (mBHasData) {
                         glm::mat4 deltaMtx = mLastR * glm::transpose(currR);
+                        if (1 == gPreTwistRatioMode) {
+                            deltaMtx = currR * glm::transpose(nextDisplayR);
+                        } else if (gPreTwistRatioMode >= 2) {
+                            deltaMtx = glm::mat4(1);
+                        }
                         deltaYaw = deltaMtx[2][0] / deltaMtx[2][2] * gPreTwistRatio;
                         float yaw = atan2(deltaMtx[2][0], deltaMtx[2][2]);
                         deltaPitch = -deltaMtx[2][1] / deltaMtx[2][2] * glm::cos(yaw) * gPreTwistRatioY / gLeftFrustum_Top * gLeftFrustum_Near;
@@ -6674,6 +6703,7 @@ void *WarpThreadMain(void *arg)
             gOverrideMeshClearLeft ||
             (pWarpFrame->frameParams.frameOptions & kEnableMotionToPhoton) ||
             !gDirectModeWarp) {
+            LOGI("willie_test before glClearColor");
             GL(glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f));
 
             switch (gMeshOrderEnum) {
@@ -6872,7 +6902,9 @@ void *WarpThreadMain(void *arg)
         }
 
         glm::mat4 rightWarpMatrix = glm::mat4(1.0);
-        rightWarpMatrix[3][2] = 1.0f;
+        if (gDisableLensCorrection) {
+            rightWarpMatrix[3][2] = 1.0f;
+        }
 
         if (bTimeWarpEnabled) {
             svrHeadPoseState displayPoseState;

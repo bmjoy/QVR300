@@ -24,7 +24,7 @@ android {
 
 
         flatDir {
-            dirs 'aar',project.ext.SVRLocation
+            dirs project.ext.SVRLocation
         }
 
     }
@@ -82,7 +82,7 @@ android {
 }
 
 dependencies {
-    debugImplementation(name: 'libuvccamera-debug', ext: 'aar')
+    //debugImplementation(name: 'libuvccamera-debug', ext: 'aar')
     debugImplementation(name: 'svrApi-v8a-debug', ext: 'aar')
     releaseImplementation(name: 'svrApi-v8a-release', ext: 'aar')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {

@@ -30,6 +30,7 @@
 #include <GLES3/gl3.h>
 
 #include <android_native_app_glue.h>
+#include <sys/system_properties.h>
 
 #include "svrApi.h"
 #include "svrApplication.h"
@@ -412,6 +413,7 @@ void CommandCallback(android_app* pApp, int32_t cmd)
         // and waiting for the app thread to clean up and exit before proceeding.
     case APP_CMD_DESTROY:
         LOGI("APP_CMD_DESTROY");
+        svrShutdown();
         break;
 
     default:
@@ -691,6 +693,25 @@ void android_main(android_app *pAppState)
                 {
                     pApp->Update();
                     pApp->Render();
+                    if (scEnableDebugWithProperty()) {
+                        char value[512];
+                        int frame = 0;
+                        __system_property_get("svr.frame", value);
+                        if ('\0' != value[0]) {
+                            sscanf(value, "%d", &frame);
+                        }
+                        if (frame == 1) {
+                            timespec t, rem;
+                            t.tv_sec = 1;
+                            t.tv_nsec = 0;
+                            nanosleep(&t, &rem);
+                        } else if (frame > 1) {
+                            timespec t, rem;
+                            t.tv_sec = 0;
+                            t.tv_nsec = 1e9 / frame;
+                            nanosleep(&t, &rem);
+                        }
+                    }
                 }
             
                 EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);

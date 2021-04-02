@@ -47,6 +47,7 @@ unsigned int GetVulkanInteropHandle(svrRenderLayer *pRenderLayer);
 #define UBER_SPHERE_STRING          "#define SUPPORT_SPHERE_MESH\n"         // Sphere mesh for kWarpEquirect and kWarpCubemap
 #define UBER_EQR_STRING             "#define SUPPORT_EQUIRECTANGULAR\n"     // kWarpEquirect = (1 << 7),
 #define UBER_CUBEMAP_STRING         "#define SUPPORT_CUBEMAP\n"             // kWarpCubemap = (1 << 8),
+#define WILLIE_AR_STRING            "#define AR_DEVICE\n"                   // kWarpCubemap = (1 << 8),
 
 #ifdef ENABLE_MOTION_VECTORS
 #define UBER_SPACEWARP_STRING       "#define SPACEWARP_SUPPORT\n"           // Global. Not hooked to a flag
@@ -133,6 +134,7 @@ enum svrWarpShaderFlag
     kWarpVignette       = (1 << 6),
     kWarpEquirect       = (1 << 7),
     kWarpCubemap        = (1 << 8),
+    kWarpARDevice = (1 << 9),
 };
 
 enum svrBoundaryMesh

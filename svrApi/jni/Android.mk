@@ -18,6 +18,9 @@ ENABLE_ATRACE := true
 # Use this to enable/disable Motion Vectors
 ENABLE_MOTION_VECTORS := true
 
+# Use this to enable/disable debug with property
+ALLOW_DEBUG_WITH_PROPERTY := false
+
 ifeq ($(ENABLE_TELEMETRY),true)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := libTelemetry
@@ -51,6 +54,11 @@ ifeq ($(ENABLE_MOTION_VECTORS),true)
 MOTION_ENGINE_PATH	    := $(SDK_ROOT_PATH)/3rdparty/motionengine
 endif
 
+# willie change start 2020-8-20
+MY_SC_MEDIATOR_DIR    := $(SDK_ROOT_PATH)/3rdparty/scmediator
+# willie change end 2020-8-20
+
+
 include $(CLEAR_VARS)
 
 ifeq ($(ENABLE_MOTION_PHOTON_TEST),true)
@@ -71,9 +79,17 @@ ifeq ($(ENABLE_MOTION_VECTORS),true)
 	LOCAL_CFLAGS += -DENABLE_MOTION_VECTORS
 endif
 
+ifeq ($(ALLOW_DEBUG_WITH_PROPERTY),true)
+	LOCAL_CFLAGS += -DDEBUG_WITH_PROPERTY
+endif
+
 LOCAL_MODULE := svrapi
 LOCAL_ARM_MODE := arm
 LOCAL_C_INCLUDES := $(GLM_ROOT_PATH) $(TINYOBJ_ROOT_PATH) $(CJSON_ROOT_PATH) $(SVR_FRAMEWORK_PATH) $(SVR_API_PUBLIC_PATH) $(SVR_API_PRIVATE_PATH) $(TELEMETRY_ROOT_PATH)/include $(QCOM_ADSP_ROOT_PATH)/include $(QCOM_QVR_SERVICE_PATH)/inc $(SVR_API_SVRCONTROLLER_UTIL_PATH) $(SVR_API_SVRCONTROLLER_PATH) $(SVR_API_SVRSERVICECLIENT_PATH)
+
+# willie change start 2020-8-20
+LOCAL_C_INCLUDES += $(MY_SC_MEDIATOR_DIR)
+# willie change end 2020-8-20
 
 ifeq ($(ENABLE_MOTION_VECTORS),true)
 LOCAL_C_INCLUDES += $(MOTION_ENGINE_PATH)/inc
@@ -95,17 +111,21 @@ FILE_LIST += $(wildcard $(LOCAL_PATH)/../private/SvrControllerUtil/jni/src/*.cpp
 FILE_LIST += $(wildcard $(LOCAL_PATH)/../private/ControllerManager/src/*.cpp)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/../private/SvrServiceClient/src/*.cpp)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/../private/Invision/src/*.cpp)
-
+FILE_LIST += $(wildcard $(LOCAL_PATH)/../private/utils/*.cpp)
 
 LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
 FILE_LIST               := $(wildcard $(LOCAL_PATH)/../../invision/*.cpp)
 FILE_LIST               += $(wildcard $(LOCAL_PATH)/../../invision/slam/*.cpp)
+FILE_LIST               += $(wildcard $(LOCAL_PATH)/../../invision/unitylauncher/*.cpp)
 LOCAL_SRC_FILES         += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 LOCAL_C_INCLUDES        += $(LOCAL_PATH)/../../invision
 LOCAL_C_INCLUDES        += $(LOCAL_PATH)/../../invision/slam
 LOCAL_C_INCLUDES        += $(LOCAL_PATH)/../../invision/gesture
+LOCAL_C_INCLUDES        += $(LOCAL_PATH)/../../invision/unitylauncher
 LOCAL_C_INCLUDES        += $(wildcard $(LOCAL_PATH)/../private/Invision/inc/*.h)
+
+LOCAL_C_INCLUDES        += $(LOCAL_PATH)/../../3rdparty/rapidxml
 
 #$(warning $(LOCAL_SRC_FILES))
 .PHONY: $(LOCAL_PATH)/../private/svrApiVersion.cpp

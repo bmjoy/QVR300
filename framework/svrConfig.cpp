@@ -150,16 +150,16 @@ void LoadVariable(const char* text)
 		text += GetWhitespaceLength(text);
 		ReadString(text, value, kMaxVariableValueLength);
 		variable->SetValue(value);
-        LOGI("%s, %s = %s",__FUNCTION__, name, value);
+        LOGI("%s = %s", name, value);
 	}
 	else {
 		if (variable) {
 			char value[kMaxVariableValueLength];
 			variable->GetValue(value, kMaxVariableValueLength);
-			LOGI("%s, %s = %s",__FUNCTION__, name, value);
+			LOGI("%s = %s", name, value);
 		}
 		else {
-			LOGE("%s, Undefined variable -- %s",__FUNCTION__, name);
+			LOGE("Undefined variable -- %s", name);
 		}
 	}
 }

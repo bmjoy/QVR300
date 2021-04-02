@@ -36,18 +36,22 @@
 #include "private/Invision/inc/IvApiCore.h"
 
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <set>
+
+// willie change start 2020-8-20
+#include <sys/stat.h>
+#include <SCMediatorHelper.h>
+// willie change end 2020-8-20
 
 #define QVRSERVICE_SDK_CONFIG_FILE  "sdk-config-file"
 
 using namespace Svr;
 
 #include <LayerFetcher.h>
-#include <InVisionThread.h>
 
-using namespace ShadowCreator;
-
+using namespace UnityLauncher;
 
 // Surface Properties
 VAR(int, gEyeBufferWidth, 1024,
@@ -202,6 +206,14 @@ VAR(bool, gUseFoveatWithoutEyeTracking, false, kVariableNonpersistent);
 
 VAR(int, gPredictVersion, 3, kVariableNonpersistent);
 
+VAR(float, gDeflection, 0, kVariableNonpersistent);
+
+VAR(bool, gUseQVRCamera, false, kVariableNonpersistent);  //Whether using QVR Camera or not
+
+VAR(bool, gUseSCCamera, false, kVariableNonpersistent);        //Whether using SC Camera or not
+
+VAR(bool, gDebugWithProperty, false, kVariableNonpersistent);
+
 EXTERN_VAR(int, gWarpMeshType);
 EXTERN_VAR(bool, gEnableWarpThreadFifo);
 EXTERN_VAR(bool, gLogRawSensorData);
@@ -215,6 +227,14 @@ EXTERN_VAR(bool, gLogMaxPredictedTime);
 EXTERN_VAR(bool, gEnableMotionVectors);
 EXTERN_VAR(bool, gForceAppEnableMotionVectors);
 #endif // ENABLE_MOTION_VECTORS
+
+EXTERN_VAR(float, gSensorOrientationCorrectX)
+EXTERN_VAR(float, gSensorOrientationCorrectY)
+EXTERN_VAR(float, gSensorOrientationCorrectZ)
+EXTERN_VAR(float, gSensorHeadOffsetX)
+EXTERN_VAR(float, gSensorHeadOffsetY)
+EXTERN_VAR(float, gSensorHeadOffsetZ)
+
 
 int gFifoPriorityRender = 96;
 int gNormalPriorityRender = 0;
@@ -242,22 +262,20 @@ double L_MilliSecondsToNextVSync();
 
 float L_MilliSecondsSinceVrStart();
 
-float mPanelInfo[68 * 20] = {0}; // max 20 panel, one panel struct (id nPoints 3xmaxpoints(20) createPoint normal)
+// willie change start 2020-8-20
+SCMediatorHelper *gMediatorHelper = nullptr;
+// willie change end 2020-8-20
+
+float mPanelInfo[68 * 20] = {
+        0}; // max 20 panel, one panel struct (id nPoints 3xmaxpoints(20) createPoint normal)
 int mPanelSize = 0; // max 20 panel
 namespace Svr {
     SvrAppContext *gAppContext = NULL;
+    constexpr int CAMERA_BUFFER_NUM = 2;
+    int gCameraFrameIndexArray[CAMERA_BUFFER_NUM] = {-1};
+    CameraFrameData gCameraFrameDataArray[CAMERA_BUFFER_NUM];
+    int gCameraFrameIndex = 0;
 }
-
-
-struct LayerThreadData {
-    InVisionThread *thread;
-    InVisionSignal *initializedSignal;
-    InVisionSignal *endRenderingSignal;
-    LayerFetcher *layerFetcher;
-    bool bTerminated;
-    bool bError;
-};
-
 struct LayerVertex {
     float vertexPosition[12];
     float vertexUV[8];
@@ -268,7 +286,6 @@ std::vector<LayerData> mLayerDataVector;
 std::vector<LayerVertex> mLayerVertexVector;
 std::vector<uint> mLayerTextureIdVector;
 glm::mat4 mViewMatrix{1};
-glm::fquat mDragViewQuaternion{1, 0, 0, 0};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -533,25 +550,47 @@ SvrResult svrSetPerformanceLevelsInternal(svrPerfLevel cpuPerfLevel, svrPerfLeve
         return SVR_ERROR_NONE;
     } else {
         if (gAppContext->qvrHelper) {
+            qvrservice_perf_level_t qvrLevels[2];
+
+            qvrLevels[0].hw_type = HW_TYPE_CPU;
+            qvrLevels[0].perf_level = SvrPerfLevelToQvrPerfLevel(cpuPerfLevel);
+
+            qvrLevels[1].hw_type = HW_TYPE_GPU;
+            qvrLevels[1].perf_level = SvrPerfLevelToQvrPerfLevel(gpuPerfLevel);
+
+            LOGI("Attempting to set perf to (%d, %d)", qvrLevels[0].perf_level,
+                 qvrLevels[1].perf_level);
+            int res = QVRServiceClient_SetOperatingLevel(gAppContext->qvrHelper, &qvrLevels[0], 2,
+                                                         NULL,
+                                                         NULL);
+            if (res != QVR_SUCCESS) {
+                L_LogQvrError("QVRServiceClient_SetOperatingLevel", res);
+            } else {
+                LOGI("svrSetPerformanceLevels CPU Level : %d",
+                     (unsigned int) qvrLevels[0].perf_level);
+                LOGI("svrSetPerformanceLevels GPU Level : %d",
+                     (unsigned int) qvrLevels[1].perf_level);
+            }
+
             if (gAppContext->modeContext) {
                 int32_t qRes;
 
                 if (gAppContext->modeContext->renderThreadId > 0) {
-                    LOGI("Calling SetThreadAttributesByType for RENDER thread...");
                     QVRSERVICE_THREAD_TYPE threadType = gEnableRenderThreadFifo ? RENDER : NORMAL;
                     qRes = QVRServiceClient_SetThreadAttributesByType(gAppContext->qvrHelper,
                                                                       gAppContext->modeContext->renderThreadId,
                                                                       threadType);
+                    LOGI("Calling SetThreadAttributesByType for RENDER thread..., type = %s, ret = %d",(gEnableRenderThreadFifo ? "RENDER" : "NORMAL"),qRes);
                     if (qRes != QVR_SUCCESS) {
                         L_LogQvrError("QVRServiceClient_SetThreadAttributesByType", qRes);
                     }
                 }
                 if (gAppContext->modeContext->warpThreadId > 0) {
-                    LOGI("Calling SetThreadAttributesByType for WARP thread...");
                     QVRSERVICE_THREAD_TYPE threadType = gEnableWarpThreadFifo ? WARP : NORMAL;
                     qRes = QVRServiceClient_SetThreadAttributesByType(gAppContext->qvrHelper,
                                                                       gAppContext->modeContext->warpThreadId,
                                                                       threadType);
+                    LOGI("Calling SetThreadAttributesByType for WARP thread..., type = %s, ret = %d",(gEnableWarpThreadFifo ? "WARP" : "NORMAL"),qRes);
                     if (qRes != QVR_SUCCESS) {
                         L_LogQvrError("QVRServiceClient_SetThreadAttributesByType", qRes);
                     }
@@ -659,7 +698,6 @@ void L_SetThreadPriority(const char *pName, int policy, int priority)
         }
     }
 
-
     // What was the result?
     int newPolicy = sched_getscheduler(gettid());
     switch (newPolicy) {
@@ -697,6 +735,366 @@ void L_SetThreadPriority(const char *pName, int policy, int priority)
     }
 }
 
+void fetchingQVRCameraFrame() {
+    LOGI("fetchingQVRCameraFrame start");
+    bool bCameraOpen = false;
+    QVRCAMERA_CAMERA_STATUS cameraStatus = QVRCAMERA_CAMERA_ERROR;
+    int currQVRFrameIndex = 0;
+    qvrcamera_frame_t currQVRFrame;
+    std::chrono::high_resolution_clock::time_point lastFetchNano;
+    constexpr long INTERVAL_NANO = 1e9 / 60;
+    int res = 0;
+    bool bGoodFrame = true;
+    while (!gAppContext->qvrCameraTerminalSignal.isSignaled()) {
+        if (!gAppContext->qvrCameraStartSignal.isSignaled()) {
+            LOGI("fetchingQVRCameraFrame before sleep");
+            gAppContext->qvrCameraStartSignal.waitSignal(Vera::VeraSignal::SIGNAL_TIMEOUT_INFINITE);
+            LOGI("fetchingQVRCameraFrame after sleep");
+
+            if(gAppContext->qvrCameraTerminalSignal.isSignaled()){
+                break;
+            }
+        }
+
+        auto startNano = std::chrono::high_resolution_clock::now();
+        auto deltaNanos = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                startNano - lastFetchNano).count();
+        if (deltaNanos > INTERVAL_NANO) {
+            res = QVRCameraDevice_GetCurrentFrameNumber(gAppContext->qvrDeviceClient,
+                                                        &currQVRFrameIndex);
+            bGoodFrame = (res == QVR_CAM_SUCCESS) && (currQVRFrameIndex >= 0);
+            if (bGoodFrame) {
+                bGoodFrame = gAppContext->newCameraBufferIdx < 0 ||
+                             (gAppContext->newCameraBufferIdx >= 0 &&
+                              gCameraFrameIndexArray[gAppContext->newCameraBufferIdx] !=
+                              currQVRFrameIndex);
+                if (bGoodFrame) {
+                    res = QVRCameraDevice_GetFrame(gAppContext->qvrDeviceClient,
+                                                   &currQVRFrameIndex,
+                                                   QVRCAMERA_MODE_BLOCKING,
+                                                   QVRCAMERA_MODE_NEWER_IF_AVAILABLE,
+                                                   &currQVRFrame);
+                    bGoodFrame = res == QVR_CAM_SUCCESS;
+                }
+            }
+            if (bGoodFrame) {
+                gAppContext->newCameraBufferIdx =
+                        (gAppContext->newCameraBufferIdx + 1) % CAMERA_BUFFER_NUM;
+                memcpy(gCameraFrameDataArray[gAppContext->newCameraBufferIdx].dataArray,
+                       currQVRFrame.buffer,
+                       currQVRFrame.len);
+                gCameraFrameDataArray[gAppContext->newCameraBufferIdx].frameIndex = currQVRFrame.fn;
+                gCameraFrameDataArray[gAppContext->newCameraBufferIdx].exposureNano = currQVRFrame.start_of_exposure_ts;
+                gCameraFrameIndexArray[gAppContext->newCameraBufferIdx] = currQVRFrameIndex;
+                {
+                    std::unique_lock<std::mutex> autoLock(gAppContext->cameraMutex);
+                    gAppContext->availableCameraBufferIdx = gAppContext->newCameraBufferIdx;
+                }
+                QVRCameraDevice_ReleaseFrame(gAppContext->qvrDeviceClient,
+                                             currQVRFrameIndex);
+            } else {
+                Vera::CpuTimer::getInstance()->sleep(1e6);
+            }
+            lastFetchNano = startNano;
+        }
+    }
+    LOGI("fetchingQVRCameraFrame out of loop");
+}
+
+
+SvrResult svrInitQVRCamera() {
+    LOGI("svrInitQVRCamera start gUseQVRCamera=%d", gUseQVRCamera);
+    if (!gUseQVRCamera) {
+        LOGE("svrInitQVRCamera return directly for gUseQVRCamera=false");
+        return SVR_ERROR_NONE;
+    }
+    if (nullptr == gAppContext->qvrCameraClient) {
+        gAppContext->qvrCameraClient = QVRCameraClient_Create();
+        if (nullptr == gAppContext->qvrCameraClient) {
+            LOGE("svrInitQVRCamera Failed for QVRCameraClient_Create");
+            return SVR_ERROR_UNKNOWN;
+        }
+    }
+    gAppContext->qvrCameraApiVersion = QVRCameraClient_GetVersion(gAppContext->qvrCameraClient);
+    LOGI("svrInitQVRCamera qvrCameraApiVersion=%d", gAppContext->qvrCameraApiVersion);
+
+    gAppContext->qvrDeviceClient = QVRCameraClient_AttachCamera(gAppContext->qvrCameraClient,
+                                                                QVRSERVICE_CAMERA_NAME_TRACKING);
+    if (nullptr == gAppContext->qvrDeviceClient) {
+        LOGE("svrInitQVRCamera Failed for QVRCameraClient_AttachCamera");
+        return SVR_ERROR_UNKNOWN;
+    }
+
+    QVRCAMERA_CAMERA_STATUS cameraStatus = QVRCAMERA_CAMERA_ERROR;
+    int32_t res = QVRCameraDevice_GetCameraState(gAppContext->qvrDeviceClient, &cameraStatus);
+    if (QVR_CAM_SUCCESS != res) {
+        LOGE("svrInitQVRCamera Failed for QVRCameraDevice_GetCameraState res=%d", res);
+        return SVR_ERROR_UNKNOWN;
+    }
+    LOGI("svrInitQVRCamera cameraStatus=%d", cameraStatus);
+
+    char paramVal[2] = {0};
+    res = QVRCameraDevice_GetParamNum(gAppContext->qvrDeviceClient,
+                                      QVR_CAMDEVICE_UINT16_CAMERA_FRAME_WIDTH,
+                                      QVRCAMERA_PARAM_NUM_TYPE_UINT16,
+                                      sizeof(uint16_t),
+                                      paramVal);
+    if (QVR_CAM_SUCCESS != res) {
+        LOGE("svrInitQVRCamera Failed for QVRCameraDevice_GetParamNum FRAME_WIDTH res=%d", res);
+        return SVR_ERROR_UNKNOWN;
+    }
+    gAppContext->cameraWidth = *reinterpret_cast<uint16_t *>(paramVal);
+    res = QVRCameraDevice_GetParamNum(gAppContext->qvrDeviceClient,
+                                      QVR_CAMDEVICE_UINT16_CAMERA_FRAME_HEIGHT,
+                                      QVRCAMERA_PARAM_NUM_TYPE_UINT16,
+                                      sizeof(uint16_t),
+                                      paramVal);
+    if (QVR_CAM_SUCCESS != res) {
+        LOGE("svrInitQVRCamera Failed for QVRCameraDevice_GetParamNum FRAME_WIDTH res=%d", res);
+        return SVR_ERROR_UNKNOWN;
+    }
+    gAppContext->cameraHeight = *reinterpret_cast<uint16_t *>(paramVal);
+    LOGI("svrInitQVRCamera cameraWidth=%u, cameraHeight=%u", gAppContext->cameraWidth,
+         gAppContext->cameraHeight);
+    for (int bufferIdx = 0; bufferIdx != CAMERA_BUFFER_NUM; ++bufferIdx) {
+        gCameraFrameDataArray[bufferIdx].dataArray = new uint8_t[gAppContext->cameraWidth *
+                                                                 gAppContext->cameraHeight];
+        gCameraFrameIndexArray[bufferIdx] = -1;
+    }
+    gAppContext->qvrCameraThread = std::thread(fetchingQVRCameraFrame);
+    LOGI("svrInitQVRCamera done");
+    return SVR_ERROR_NONE;
+}
+
+
+SvrResult svrDestroyQVRCamera() {
+    LOGI("svrDestroyQVRCamera start gUseQVRCamera=%d", gUseQVRCamera);
+    if (!gUseQVRCamera) {
+        return SVR_ERROR_NONE;
+    }
+
+    gAppContext->qvrCameraTerminalSignal.raiseSignal();
+    gAppContext->qvrCameraStartSignal.raiseSignal();
+    if(gAppContext->qvrCameraThread.joinable()){
+        LOGI("%s, qvr Camera Thread was joinable", __FUNCTION__ );
+        gAppContext->qvrCameraThread.join();
+    } else {
+        LOGE("%s, qvr Camera Thread was not joinable", __FUNCTION__ );
+    }
+
+    QVRCameraDevice_DetachCamera(gAppContext->qvrDeviceClient);
+    gAppContext->qvrDeviceClient = nullptr;
+    QVRCameraClient_Destroy(gAppContext->qvrCameraClient);
+    gAppContext->qvrCameraClient = nullptr;
+    // willie change end 2020-8-12
+    LOGI("svrDestroyQVRCamera done");
+    return SVR_ERROR_NONE;
+}
+
+SvrResult svrGetLatestCameraDataForUnity(bool &outBUpdate, uint32_t &outCurrFrameIndex,
+                                         uint64_t &outFrameExposureNano, uint8_t *outFrameData,
+                                         float *outTRDataArray) {
+    outBUpdate = false;
+    int availableIndex = -1;
+    {
+        std::unique_lock<std::mutex> autoLock(gAppContext->cameraMutex);
+        availableIndex = gAppContext->availableCameraBufferIdx;
+    }
+    if (-1 == availableIndex || -1 == gCameraFrameIndexArray[availableIndex]) {
+        LOGI("sxrGetLatestCameraFrameData skip for availableIndex=%d", availableIndex);
+        return SVR_ERROR_NONE;
+    }
+    if (outCurrFrameIndex != gCameraFrameIndexArray[availableIndex]) {
+        // copy left half qvr camera data
+        int halfWidth = gAppContext->cameraWidth / 2;
+        for (int idx = 0; idx != gAppContext->cameraHeight; ++idx) {
+            memcpy(outFrameData + idx * halfWidth,
+                   gCameraFrameDataArray[availableIndex].dataArray +
+                   idx * gAppContext->cameraWidth, sizeof(bool) * halfWidth);
+        }
+        // copy the whole qvr camera array data
+//        memcpy(outFrameData, gCameraFrameDataArray[availableIndex].dataArray,
+//               gAppContext->cameraWidth * gAppContext->cameraHeight);
+        outCurrFrameIndex = gCameraFrameIndexArray[availableIndex];
+        outFrameExposureNano = gCameraFrameDataArray[availableIndex].exposureNano;
+        if (gAppContext->mUseIvSlam) {
+            float ivpose[16] = {0};
+            double exposureSecond = outFrameExposureNano * 1.0e-9;
+            IvSlamClient_GetPose(gAppContext->ivslamHelper, ivpose, -1, exposureSecond);
+            glm::mat4 poseMatrix = glm::make_mat4(ivpose);
+            glm::quat outData_rotationQuaternion = glm::quat_cast(poseMatrix);
+            outTRDataArray[0] = outData_rotationQuaternion.x;
+            outTRDataArray[1] = outData_rotationQuaternion.y;
+            outTRDataArray[2] = outData_rotationQuaternion.z;
+            outTRDataArray[3] = outData_rotationQuaternion.w;
+            outTRDataArray[4] = poseMatrix[3][0];
+            outTRDataArray[5] = poseMatrix[3][1];
+            outTRDataArray[6] = poseMatrix[3][2];
+        } else {
+            auto historyPose = svrGetHistoricHeadPose(outFrameExposureNano, true).pose;
+            outTRDataArray[0] = historyPose.rotation.x;
+            outTRDataArray[1] = historyPose.rotation.y;
+            outTRDataArray[2] = historyPose.rotation.z;
+            outTRDataArray[3] = historyPose.rotation.w;
+            outTRDataArray[4] = historyPose.position.x;
+            outTRDataArray[5] = historyPose.position.y;
+            outTRDataArray[6] = historyPose.position.z;
+        }
+
+        // modify orientation.z and position.xy
+        outTRDataArray[2] = -outTRDataArray[2];
+        outTRDataArray[4] = -outTRDataArray[4];
+        outTRDataArray[5] = -outTRDataArray[5];
+
+        outBUpdate = true;
+    }
+    return SVR_ERROR_NONE;
+}
+
+
+SvrResult
+svrGetLatestCameraDataForUnityNoTransform(bool &outBUpdate, uint32_t &outCurrFrameIndex,
+                                          uint64_t &outFrameExposureNano, uint8_t *outFrameData,
+                                          float *outTRDataArray) {
+    outBUpdate = false;
+    int availableIndex = -1;
+    {
+        std::unique_lock<std::mutex> autoLock(gAppContext->cameraMutex);
+        availableIndex = gAppContext->availableCameraBufferIdx;
+    }
+    if (-1 == availableIndex || -1 == gCameraFrameIndexArray[availableIndex]) {
+        LOGI("sxrGetLatestCameraFrameData skip for availableIndex=%d", availableIndex);
+        return SVR_ERROR_NONE;
+    }
+    if (outCurrFrameIndex != gCameraFrameIndexArray[availableIndex]) {
+        // copy left half qvr camera data
+        int halfWidth = gAppContext->cameraWidth / 2;
+        for (int idx = 0; idx != gAppContext->cameraHeight; ++idx) {
+            memcpy(outFrameData + idx * halfWidth,
+                   gCameraFrameDataArray[availableIndex].dataArray +
+                   idx * gAppContext->cameraWidth, sizeof(bool) * halfWidth);
+        }
+        // copy the whole qvr camera array data
+//        memcpy(outFrameData, gCameraFrameDataArray[availableIndex].dataArray,
+//               gAppContext->cameraWidth * gAppContext->cameraHeight);
+        outCurrFrameIndex = gCameraFrameIndexArray[availableIndex];
+        outFrameExposureNano = gCameraFrameDataArray[availableIndex].exposureNano;
+        float rawCorrectX = gSensorOrientationCorrectX;
+        float rawCorrectY = gSensorOrientationCorrectY;
+        float rawCorrectZ = gSensorOrientationCorrectZ;
+        float rawHeadOffsetX = gSensorHeadOffsetX;
+        float rawHeadOffsetY = gSensorHeadOffsetY;
+        float rawHeadOffsetZ = gSensorHeadOffsetZ;
+        gSensorOrientationCorrectX = 0;
+        gSensorOrientationCorrectY = 0;
+        gSensorOrientationCorrectZ = 0;
+        gSensorHeadOffsetX = 0;
+        gSensorHeadOffsetY = 0;
+        gSensorHeadOffsetZ = 0;
+        if (gAppContext->mUseIvSlam) {
+            float ivpose[16] = {0};
+            double exposureSecond = outFrameExposureNano * 1.0e-9;
+            IvSlamClient_GetPose(gAppContext->ivslamHelper, ivpose, -1, exposureSecond);
+            glm::mat4 poseMatrix = glm::make_mat4(ivpose);
+            glm::quat outData_rotationQuaternion = glm::quat_cast(poseMatrix);
+            outTRDataArray[0] = outData_rotationQuaternion.x;
+            outTRDataArray[1] = outData_rotationQuaternion.y;
+            outTRDataArray[2] = outData_rotationQuaternion.z;
+            outTRDataArray[3] = outData_rotationQuaternion.w;
+            outTRDataArray[4] = poseMatrix[3][0];
+            outTRDataArray[5] = poseMatrix[3][1];
+            outTRDataArray[6] = poseMatrix[3][2];
+        } else {
+            auto historyPose = svrGetHistoricHeadPose(outFrameExposureNano, true).pose;
+            outTRDataArray[0] = historyPose.rotation.x;
+            outTRDataArray[1] = historyPose.rotation.y;
+            outTRDataArray[2] = historyPose.rotation.z;
+            outTRDataArray[3] = historyPose.rotation.w;
+            outTRDataArray[4] = historyPose.position.x;
+            outTRDataArray[5] = historyPose.position.y;
+            outTRDataArray[6] = historyPose.position.z;
+        }
+        gSensorOrientationCorrectX = rawCorrectX;
+        gSensorOrientationCorrectY = rawCorrectY;
+        gSensorOrientationCorrectZ = rawCorrectZ;
+        gSensorHeadOffsetX = rawHeadOffsetX;
+        gSensorHeadOffsetY = rawHeadOffsetY;
+        gSensorHeadOffsetZ = rawHeadOffsetZ;
+
+
+        // modify orientation.z and position.xy
+        outTRDataArray[2] = -outTRDataArray[2];
+        outTRDataArray[4] = -outTRDataArray[4];
+        outTRDataArray[5] = -outTRDataArray[5];
+
+        outBUpdate = true;
+    }
+    return SVR_ERROR_NONE;
+}
+
+
+void a11CameraCallback(void *data, uint64_t ts, u_short gain, u_short exp) {
+    LOGI("a11CameraCallback start exp=%u", exp);
+    if (exp >= 1500) {
+        gAppContext->newCameraBufferIdx =
+                (gAppContext->newCameraBufferIdx + 1) % CAMERA_BUFFER_NUM;
+        memcpy(gCameraFrameDataArray[gAppContext->newCameraBufferIdx].dataArray,
+               data, 1280 * 480);
+        gCameraFrameDataArray[gAppContext->newCameraBufferIdx].exposureNano = ts;
+        gCameraFrameIndexArray[gAppContext->newCameraBufferIdx] = gCameraFrameIndex++;
+        {
+            std::unique_lock<std::mutex> autoLock(gAppContext->cameraMutex);
+            gAppContext->availableCameraBufferIdx = gAppContext->newCameraBufferIdx;
+        }
+        LOGI("IvCameraCallback handle finished");
+    }
+    LOGI("IvCameraCallback done");
+}
+
+SvrResult svrInitSCCamera() {
+    LOGI("svrInitSCCamera start gUseSCCamera=%d gUseLinePtr=%d", gUseSCCamera, gUseLinePtr);
+    if (!gUseSCCamera) {
+        return SVR_ERROR_NONE;
+    }
+    if (nullptr == gAppContext) {
+        return SVR_ERROR_UNKNOWN;
+    }
+    LOGI("svrInitSCCamera gAppContext->a11GdeviceClientHelper=%p",
+         gAppContext->a11GdeviceClientHelper);
+
+    if (!gUseLinePtr) {
+        gAppContext->a11GdeviceClientHelper = A11GDeviceClient_Create();
+        A11GDeviceClient_Start(gAppContext->a11GdeviceClientHelper, TYPE_OTHERS);
+    }
+    A11GDeviceClient_RegisterCameraCB(gAppContext->a11GdeviceClientHelper, a11CameraCallback);
+    gAppContext->cameraWidth = 1280;
+    gAppContext->cameraHeight = 480;
+    for (int bufferIdx = 0; bufferIdx != CAMERA_BUFFER_NUM; ++bufferIdx) {
+        gCameraFrameDataArray[bufferIdx].dataArray = new uint8_t[gAppContext->cameraWidth *
+                                                                 gAppContext->cameraHeight];
+        gCameraFrameIndexArray[bufferIdx] = -1;
+    }
+
+    LOGI("svrInitSCCamera done");
+    return SVR_ERROR_NONE;
+}
+
+
+SvrResult svrDestroySCCamera() {
+    LOGI("svrDestroySCCamera start gUseSCCamera=%d", gUseSCCamera);
+    if (!gUseSCCamera || nullptr == gAppContext->a11GdeviceClientHelper) {
+        return SVR_ERROR_NONE;
+    }
+    if (nullptr == gAppContext) {
+        return SVR_ERROR_UNKNOWN;
+    }
+    if (!gUseLinePtr) {
+        A11GDeviceClient_Stop(gAppContext->a11GdeviceClientHelper, TYPE_OTHERS);
+    }
+    LOGI("svrDestroyQVRCamera done");
+    return SVR_ERROR_NONE;
+}
+
 //-----------------------------------------------------------------------------
 extern "C" SVRP_EXPORT SvrResult
 
@@ -722,6 +1120,58 @@ static bool userIvSlam() {
     return ret;
 }
 
+int loadTransformMatrix(std::string path) {
+    LOGI("loadTransformMatrix start path=%s", path.c_str());
+
+    std::ifstream file(path);
+    if (file.fail()) {
+        LOGE("LayerScene::loadTransformMatrix Failed, use default");
+        gAppContext->transformMatrixArray[0] = glm::mat4(1);
+        gAppContext->transformMatrixArray[1] = glm::mat4(1);
+        gAppContext->useTransformMatrix = false;
+        return 1;
+    }
+    std::stringstream ss;
+    ss << file.rdbuf();
+    file.close();
+    std::vector<float> valueVector{std::istream_iterator<float>(ss),
+                                   std::istream_iterator<float>()};
+    gAppContext->transformMatrixArray[0] = glm::transpose(glm::make_mat4(&valueVector[0]));
+    gAppContext->transformMatrixArray[1] = glm::transpose(glm::make_mat4(&valueVector[16]));
+    gAppContext->useTransformMatrix = true;
+    // willie note here 2020-12-5
+    // currently disable transform matrix.
+//    gAppContext->useTransformMatrix = false;
+
+    glm::mat4 correctionYMatrix = glm::rotate(glm::mat4(1),
+//                                              glm::radians(gSensorOrientationCorrectY),
+                                              glm::radians(11.0f),
+                                              glm::vec3(1.0f, 0.0f, 0.0f));
+    gAppContext->correctYQuat = glm::quat_cast(correctionYMatrix);
+    LOGI("left transformMatrix = [%f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f]",
+         gAppContext->transformMatrixArray[0][0][0], gAppContext->transformMatrixArray[0][1][0],
+         gAppContext->transformMatrixArray[0][2][0], gAppContext->transformMatrixArray[0][3][0],
+         gAppContext->transformMatrixArray[0][0][1], gAppContext->transformMatrixArray[0][1][1],
+         gAppContext->transformMatrixArray[0][2][1], gAppContext->transformMatrixArray[0][3][1],
+         gAppContext->transformMatrixArray[0][0][2], gAppContext->transformMatrixArray[0][1][2],
+         gAppContext->transformMatrixArray[0][2][2], gAppContext->transformMatrixArray[0][3][2],
+         gAppContext->transformMatrixArray[0][0][3], gAppContext->transformMatrixArray[0][1][3],
+         gAppContext->transformMatrixArray[0][2][3], gAppContext->transformMatrixArray[0][3][3]);
+    LOGI("right transformMatrix = [%f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f]",
+         gAppContext->transformMatrixArray[1][0][0], gAppContext->transformMatrixArray[1][1][0],
+         gAppContext->transformMatrixArray[1][2][0], gAppContext->transformMatrixArray[1][3][0],
+         gAppContext->transformMatrixArray[1][0][1], gAppContext->transformMatrixArray[1][1][1],
+         gAppContext->transformMatrixArray[1][2][1], gAppContext->transformMatrixArray[1][3][1],
+         gAppContext->transformMatrixArray[1][0][2], gAppContext->transformMatrixArray[1][1][2],
+         gAppContext->transformMatrixArray[1][2][2], gAppContext->transformMatrixArray[1][3][2],
+         gAppContext->transformMatrixArray[1][0][3], gAppContext->transformMatrixArray[1][1][3],
+         gAppContext->transformMatrixArray[1][2][3], gAppContext->transformMatrixArray[1][3][3]);
+    LOGI("correctYQuat=[%f, %f, %f, %f]", gAppContext->correctYQuat.x, gAppContext->correctYQuat.y,
+         gAppContext->correctYQuat.z, gAppContext->correctYQuat.w);
+    LOGI("loadTransformMatrix done");
+    return 0;
+}
+
 //-----------------------------------------------------------------------------
 SvrResult svrInitialize(const svrInitParams *pInitParams)
 //-----------------------------------------------------------------------------
@@ -729,6 +1179,8 @@ SvrResult svrInitialize(const svrInitParams *pInitParams)
     LOGI("svrInitialize");
 
     LOGI("svrApi Version : %s (%s)", svrGetVersion(), ABI_STRING);
+
+    LOGI("Invision Version : %s", getInvisionVersion());
 
     gAppContext = new SvrAppContext();
 
@@ -850,9 +1302,6 @@ SvrResult svrInitialize(const svrInitParams *pInitParams)
         jint displayWidth = pThreadJEnv->CallStaticIntMethod(gAppContext->javaSvrApiClass,
                                                              getDisplayWidthId,
                                                              gAppContext->javaActivityObject);
-        if (displayWidth == 1280 || displayWidth == 1920) {
-            displayWidth *= 2;
-        }
         gAppContext->deviceInfo.displayWidthPixels = displayWidth;
         LOGI("Display Width : %d", displayWidth);
     }
@@ -991,32 +1440,44 @@ SvrResult svrInitialize(const svrInitParams *pInitParams)
         } else {
             LOGE("%s, Loading variables from svrapi_config.txt fail", __FUNCTION__);
         }
+        loadTransformMatrix("/data/misc/ivslam/a11_transform.txt");
     } else {
-        qRes = QVRServiceClient_GetParam(gAppContext->qvrHelper, QVRSERVICE_SDK_CONFIG_FILE, &len,
-                                         NULL);
-        if (qRes == QVR_SUCCESS) {
-            LOGI("Loading variables from QVR Service [len=%d]", len);
-            if (len > 0) {
-                char *p = new char[len];
-                qRes = QVRServiceClient_GetParam(gAppContext->qvrHelper, QVRSERVICE_SDK_CONFIG_FILE,
-                                                 &len, p);
-                if (qRes == QVR_SUCCESS) {
-                    LoadVariableBuffer(p);
-                } else {
-                    L_LogQvrError(
-                            "QVRServiceClient_SetClientStatusCallback(QVRSERVICE_SDK_CONFIG_FILE)",
-                            qRes);
-                }
-                delete[] p;
-            }
+        // willie change start 2020-8-20
+        std::string customPath{"/persist/qvr/svrapi_config.txt"};
+        std::string oriPath{"/system/vendor/etc/qvr/svrapi_config.txt"};
+        struct stat testBuffer;
+        if (stat(customPath.c_str(), &testBuffer) == 0) {
+            LoadVariableFile(customPath.c_str());
         } else {
-            L_LogQvrError("QVRServiceClient_GetParam(QVRSERVICE_SDK_CONFIG_FILE - Length)", qRes);
+            LoadVariableFile(oriPath.c_str());
         }
+
+        loadTransformMatrix("/persist/qvr/a95_transform.txt");
+//        qRes = QVRServiceClient_GetParam(gAppContext->qvrHelper, QVRSERVICE_SDK_CONFIG_FILE, &len,
+//                                         NULL);
+//        if (qRes == QVR_SUCCESS) {
+//            LOGI("Loading variables from QVR Service [len=%d]", len);
+//            if (len > 0) {
+//                char *p = new char[len];
+//                qRes = QVRServiceClient_GetParam(gAppContext->qvrHelper, QVRSERVICE_SDK_CONFIG_FILE,
+//                                                 &len, p);
+//                if (qRes == QVR_SUCCESS) {
+//                    LoadVariableBuffer(p);
+//                } else {
+//                    L_LogQvrError(
+//                            "QVRServiceClient_SetClientStatusCallback(QVRSERVICE_SDK_CONFIG_FILE)",
+//                            qRes);
+//                }
+//                delete[] p;
+//            }
+//        } else {
+//            L_LogQvrError("QVRServiceClient_GetParam(QVRSERVICE_SDK_CONFIG_FILE - Length)", qRes);
+//        }
     }
 
 
     if (gUseLinePtr) {
-        if(!gAppContext->mUseIvSlam){
+        if (!gAppContext->mUseIvSlam) {
             //Make sure the linePtr support is actually available
             qvrservice_ts_t *qvrStamp;
             qRes = QVRServiceClient_GetDisplayInterruptTimestamp(gAppContext->qvrHelper,
@@ -1025,7 +1486,7 @@ SvrResult svrInitialize(const svrInitParams *pInitParams)
                 L_LogQvrError("QVRServiceClient_GetDisplayInterruptTimestamp", qRes);
                 gUseLinePtr = false;
             }
-        }else {
+        } else {
             gAppContext->a11GdeviceClientHelper = A11GDeviceClient_Create();
         }
     }
@@ -1107,6 +1568,12 @@ SvrResult svrInitialize(const svrInitParams *pInitParams)
     }
 
     LOGI("Using QVR Performance Module");
+    if (gAppContext->mUseIvSlam) {
+        svrInitSCCamera();
+    } else {
+        svrInitQVRCamera();
+    }
+
 
     return SVR_ERROR_NONE;
 }
@@ -1116,6 +1583,11 @@ SvrResult svrShutdown()
 //-----------------------------------------------------------------------------
 {
     LOGI("svrShutdown");
+    if (gAppContext->mUseIvSlam) {
+        svrDestroySCCamera();
+    } else {
+        svrDestroyQVRCamera();
+    }
 
     PROFILE_SHUTDOWN();
 
@@ -1135,6 +1607,12 @@ SvrResult svrShutdown()
         gAppContext->ivhandshankHelper = nullptr;
     }
     // add by chenweihua 20201026 (end)
+
+    LOGI("svrShutdown call A11GDeviceClient_Destroy a11GdeviceClientHelper=%p",
+         gAppContext->a11GdeviceClientHelper);
+    if (gAppContext->a11GdeviceClientHelper) {
+        A11GDeviceClient_Destroy(gAppContext->a11GdeviceClientHelper);
+    }
 
     if (gAppContext != NULL) {
         // Disconnect from SvrService
@@ -1157,6 +1635,7 @@ SvrResult svrShutdown()
         gAppContext = NULL;
     }
 
+    LOGI("%s end",__FUNCTION__);
     return SVR_ERROR_NONE;
 }
 
@@ -1240,10 +1719,6 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
         return SVR_ERROR_VRMODE_NOT_INITIALIZED;
     }
 
-//    if(gAppContext->mUseIvSlam){
-//        return invisionBeginVr(pBeginParams);
-//    }
-
     LOGI("svrBeginVr");
 
     if (!gGpuBusyFStream.is_open()) {
@@ -1304,9 +1779,11 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
         }
 
         serviceState = QVRServiceClient_GetVRMode(gAppContext->qvrHelper);
-        const int maxTries = 20;
+
+        const int maxTries = 8;
+        const int waitTime = 500000;
         int attempt = 0;
-        while (serviceState != VRMODE_STARTED && (attempt < maxTries)) {
+        while (serviceState != VRMODE_STOPPED && (attempt < maxTries)) {
             switch (serviceState) {
                 case VRMODE_UNSUPPORTED:
                     LOGE("svrBeginVr called but VR service is in state VRMODE_UNSUPPORTED, waiting... (attempt %d)",
@@ -1314,6 +1791,10 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
                     break;
                 case VRMODE_STARTING:
                     LOGE("svrBeginVr called but VR service is in state VRMODE_STARTING, waiting... (attempt %d)",
+                         attempt);
+                    break;
+                case VRMODE_STARTED:
+                    LOGE("svrBeginVr called but VR service is in state VRMODE_STARTED, waiting... (attempt %d)",
                          attempt);
                     break;
                 case VRMODE_STOPPING:
@@ -1330,9 +1811,14 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
                          serviceState, attempt);
                     break;
             }
-            usleep(100000);
+            usleep(waitTime);
             serviceState = QVRServiceClient_GetVRMode(gAppContext->qvrHelper);
             attempt++;
+        }
+
+        if (serviceState != VRMODE_STOPPED) {
+            LOGE("svrBeginVr, VR service is currently unavailable for this application.");
+            return SVR_ERROR_QVR_SERVICE_UNAVAILABLE;
         }
     }
 
@@ -1410,14 +1896,14 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
     LOGI("Starting VSync Monitoring...");
 
     if (gUseLinePtr) {
-        if(!gAppContext->mUseIvSlam){
+        if (!gAppContext->mUseIvSlam) {
             LOGI("Configuring QVR Vsync Interrupt...");
             qvrservice_lineptr_interrupt_config_t interruptConfig;
             memset(&interruptConfig, 0, sizeof(qvrservice_lineptr_interrupt_config_t));
             interruptConfig.cb = 0;
             interruptConfig.line = 1;
             //TODO:Check whether the SetDisplayInterruptConfig is necessary for IvSlam
-            if(!gAppContext->mUseIvSlam){
+            if (!gAppContext->mUseIvSlam) {
                 int qRes = QVRServiceClient_SetDisplayInterruptConfig(gAppContext->qvrHelper,
                                                                       DISP_INTERRUPT_LINEPTR,
                                                                       (void *) &interruptConfig,
@@ -1426,7 +1912,7 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
                     L_LogQvrError("QVRServiceClient_SetDisplayInterruptConfig", qRes);
                 }
             }
-        }else {
+        } else {
             //A11GDeviceClient_Start(gAppContext->a11GdeviceClientHelper,TYPE_OTHERS);
         }
     } else {
@@ -1449,6 +1935,17 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
         IvSlamClient_Start(gAppContext->ivslamHelper);
     } else {
         int qRes;
+
+        //Tell the VR Service to put the system into VR Mode
+        //Note : This must be called after the line pointer interrupt has been configured
+        qRes = QVRServiceClient_StartVRMode(gAppContext->qvrHelper);
+        if (qRes != QVR_SUCCESS) {
+            L_LogQvrError("QVRServiceClient_StartVRMode", qRes);
+            delete gAppContext->modeContext;
+            gAppContext->modeContext = 0;
+            return SVR_ERROR_UNKNOWN;
+        }
+
         serviceState = QVRServiceClient_GetVRMode(gAppContext->qvrHelper);
         if (serviceState != VRMODE_STARTED) {
             switch (serviceState) {
@@ -1510,6 +2007,8 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
             LOGI("Supported tracking mode mask: 0x%x", supportedModes);
         }
 
+        // Ring Buffer Descriptor
+        qvrservice_ring_buffer_desc_t ringDesc;
         qRes = QVRServiceClient_GetRingBufferDescriptor(gAppContext->qvrHelper, RING_BUFFER_POSE,
                                                         &ringDesc);
         if (qRes != QVR_SUCCESS) {
@@ -1642,7 +2141,7 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
     svrSetPerformanceLevels(pBeginParams->cpuPerfLevel, pBeginParams->gpuPerfLevel);
 
     if (gUseLinePtr) {
-        if(!gAppContext->mUseIvSlam){
+        if (!gAppContext->mUseIvSlam) {
             int qRes = QVRServiceClient_SetDisplayInterruptCapture(gAppContext->qvrHelper,
                                                                    DISP_INTERRUPT_LINEPTR, 1);
             if (qRes != QVR_SUCCESS) {
@@ -1650,8 +2149,8 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
             } else {
                 LOGE("Started VSync Capture");
             }
-        }else {
-            A11GDeviceClient_Start(gAppContext->a11GdeviceClientHelper,TYPE_OTHERS);
+        } else {
+            A11GDeviceClient_Start(gAppContext->a11GdeviceClientHelper, TYPE_OTHERS);
         }
 
     }
@@ -1681,6 +2180,12 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
     // Only now are we truly in VR mode
     gAppContext->inVrMode = true;
 
+    if (gUseQVRCamera) {
+        LOGI("svrApiCore.cpp svrBeginVr raise qvrCameraStartSignal");
+        gAppContext->qvrCameraStartSignal.raiseSignal();
+    }
+
+
     //Signal VR Mode Active
     svrEventQueue *pQueue = gAppContext->modeContext->eventManager->AcquireEventQueue();
     svrEventData data;
@@ -1697,7 +2202,7 @@ SvrResult svrBeginVr(const svrBeginParams *pBeginParams)
     data.thermal.zone = kSkin;
     data.thermal.level = kSafe;
     pQueue->SubmitEvent(kEventThermal, data);
-    LOGI("svrBeginVr done successfully");
+
     return SVR_ERROR_NONE;
 }
 
@@ -1727,6 +2232,11 @@ SvrResult svrEndVr()
             LOGE("Unable to end VR! qvrHelper has been released!");
             return SVR_ERROR_VRMODE_NOT_INITIALIZED;
         }
+    }
+
+    if (gUseQVRCamera) {
+        LOGI("svrApiCore.cpp svrEndVr clear qvrCameraStartSignal");
+        gAppContext->qvrCameraStartSignal.clearSignal();
     }
 
     svrEventQueue *pQueue = NULL;
@@ -1801,6 +2311,12 @@ SvrResult svrEndVr()
         if (qRes != QVR_SUCCESS) {
             L_LogQvrError("QVRServiceClient_SetEyeTrackingMode (Off)", qRes);
         }
+
+        LOGI("Disconnecting from QVR Service...");
+        qRes = QVRServiceClient_StopVRMode(gAppContext->qvrHelper);
+        if (qRes != QVR_SUCCESS) {
+            L_LogQvrError("QVRServiceClient_StopVRMode", qRes);
+        }
     }
 
     if (pQueue != NULL)
@@ -1808,10 +2324,35 @@ SvrResult svrEndVr()
 
     if (gAppContext->ivslamHelper != nullptr) {
         IvSlamClient_Stop(gAppContext->ivslamHelper);
+    } else {
+        QVRSERVICE_VRMODE_STATE state;
+        state = QVRServiceClient_GetVRMode(gAppContext->qvrHelper);
+        if (state != VRMODE_STOPPED) {
+            switch (state) {
+                case VRMODE_UNSUPPORTED:
+                    LOGE("VR not stopped: Current State = VRMODE_UNSUPPORTED!");
+                    break;
+                case VRMODE_STARTING:
+                    LOGI("VR not stopped: Current State = VRMODE_STARTING");
+                    break;
+                case VRMODE_STARTED:
+                    LOGI("VR not stopped: Current State = VRMODE_STARTED");
+                    break;
+                case VRMODE_STOPPING:
+                    LOGI("VR not stopped: Current State = VRMODE_STOPPING");
+                    break;
+                case VRMODE_STOPPED:
+                    LOGI("VR not stopped: Current State = VRMODE_STOPPED");
+                    break;
+                default:
+                    LOGE("VR not stopped: Current State = %d", (int) state);
+                    break;
+            }
+        }
     }
 
-    if(gUseLinePtr && gAppContext->mUseIvSlam){
-        A11GDeviceClient_Stop(gAppContext->a11GdeviceClientHelper,TYPE_OTHERS);
+    if (gUseLinePtr && gAppContext->mUseIvSlam) {
+        A11GDeviceClient_Stop(gAppContext->a11GdeviceClientHelper, TYPE_OTHERS);
     }
 
     // Controller Manager Shutdown
@@ -2272,6 +2813,18 @@ SVRP_EXPORT float svrGetPredictedDisplayTimePipelined(unsigned int depth)
     // ... add in the pipeline depth (need depth + 1 so correct pose on screen the longest) ...
     double pipelineDepth = depth * msPerVSync;
 
+    if (gDebugWithProperty) {
+        char value[20] = {0x00};
+        __system_property_get("svr.gTimeToHalfExposure", value);
+        if ('\0' != value[0]) {
+            gTimeToHalfExposure = atof(value);
+        }
+        __system_property_get("svr.gTimeToMidEyeWarp", value);
+        if ('\0' != value[0]) {
+            gTimeToMidEyeWarp = atof(value);
+        }
+    }
+
     // ... then we add time to half exposure (already in milliseconds)...
     double timeToHalfExp = gTimeToHalfExposure;
 
@@ -2580,8 +3133,12 @@ void L_SetPoseState(svrHeadPoseState &poseState, float predictedTimeMs)
     }
 }
 
+svrHeadPoseState svrGetPredictedHeadPose(float predictedTimeMs){
+    return svrGetPredictedHeadPoseExt(predictedTimeMs, false);
+}
+
 //-----------------------------------------------------------------------------
-svrHeadPoseState svrGetPredictedHeadPose(float predictedTimeMs)
+svrHeadPoseState svrGetPredictedHeadPoseExt(float predictedTimeMs, bool virHandGesture)
 //-----------------------------------------------------------------------------
 {
     svrHeadPoseState poseState;
@@ -2637,12 +3194,21 @@ svrHeadPoseState svrGetPredictedHeadPose(float predictedTimeMs)
         poseState.poseStatus |= kTrackingPosition;
 
     if (SVR_ERROR_NONE !=
-        GetTrackingFromPredictiveSensor(predictedTimeMs, &sampleTimeStamp, poseState)) {
+        GetTrackingFromPredictiveSensorExt(predictedTimeMs, &sampleTimeStamp, poseState,virHandGesture)) {
         // LOGE("svrGetPredictedHeadPose Failed: QVR service not initialized!");
         poseState.poseStatus = 0;
         return poseState;
     }
 
+    if (gAppContext->useTransformMatrix) {
+        glm::quat oriQuat{poseState.pose.rotation.w, poseState.pose.rotation.x,
+                          poseState.pose.rotation.y, poseState.pose.rotation.z};
+        glm::quat newQuat = gAppContext->correctYQuat * oriQuat;
+        poseState.pose.rotation.w = newQuat.w;
+        poseState.pose.rotation.x = newQuat.x;
+        poseState.pose.rotation.y = newQuat.y;
+        poseState.pose.rotation.z = newQuat.z;
+    }
     // Assign to return value after adjusting for recenter
     L_SetPoseState(poseState, predictedTimeMs);
 
@@ -2709,7 +3275,7 @@ svrHeadPoseState svrGetPredictedHeadPose(float predictedTimeMs)
 }
 
 //-----------------------------------------------------------------------------
-svrHeadPoseState svrGetHistoricHeadPose(int64_t timestampNs)
+svrHeadPoseState svrGetHistoricHeadPose(int64_t timestampNs, bool bLoadCalibration)
 //-----------------------------------------------------------------------------
 {
     // Must adjust for gQTimeToAndroidBoot
@@ -2768,7 +3334,7 @@ svrHeadPoseState svrGetHistoricHeadPose(int64_t timestampNs)
         }
     }
 
-    if (SVR_ERROR_NONE != GetTrackingFromHistoricSensor(timestampNs, poseState)) {
+    if (SVR_ERROR_NONE != GetTrackingFromHistoricSensor(timestampNs, poseState, bLoadCalibration)) {
         LOGE("svrGetHistoricHeadPose Failed: Unknown!");
         poseState.poseStatus = 0;
         return poseState;
@@ -3437,7 +4003,7 @@ SVRP_EXPORT SvrResult svrSetTrackingMode(uint32_t trackingModes)
     uint32_t actualTrackingMode = trackingModes;
     if (!gAppContext->mUseIvSlam) {
         if (gForceTrackingMode != 0) {
-//        actualTrackingMode = 0;
+            actualTrackingMode = 0;
             LOGI("svrSetTrackingMode : Forcing to %d from config file", gForceTrackingMode);
             if (gForceTrackingMode & kTrackingRotation) {
                 actualTrackingMode |= kTrackingRotation;
@@ -3489,6 +4055,12 @@ SVRP_EXPORT SvrResult svrSetTrackingMode(uint32_t trackingModes)
 
     int qRes = 0;
     if (!gAppContext->mUseIvSlam) {
+        // Set normal tracking...
+        int qRes = QVRServiceClient_SetTrackingMode(gAppContext->qvrHelper, qvrTrackingMode);
+        if (qRes != QVR_SUCCESS) {
+            L_LogQvrError("QVRServiceClient_SetTrackingMode", qRes);
+        }
+
         // ...and eye tracking
         if ((actualTrackingMode & kTrackingEye) != 0) {
             LOGI("svrSetTrackingMode : Eye tracking mode requested");
@@ -3539,6 +4111,7 @@ SVRP_EXPORT SvrResult svrSetTrackingMode(uint32_t trackingModes)
     }
 
     gAppContext->currentTrackingMode = actualTrackingMode;
+
     return SVR_ERROR_NONE;
 }
 
@@ -3567,30 +4140,648 @@ SVRP_EXPORT bool svrPollEvent(svrEvent *pEvent)
     return false;
 }
 
-void layerThreadHandler(LayerThreadData *threadData) {
-    LOGI("Controller::layerThreadHandler start");
-    threadData->thread->setThreadID(gettid());
-    int res = threadData->layerFetcher->init();
-    if (res < 0) {
-        LOGE("Controller::layerThreadHandler Failed for init layerFetcher");
-        threadData->bError = true;
+SVRP_EXPORT float svrFetchDeflection() {
+    return gDeflection;
+}
+
+// willie change start 2020-8-20
+SVRP_EXPORT void svrUpdateRelativeDeflection(int deflection) {
+    LOGI("scUpdateRelativeDeflection start set abstract deflection=%d, gMediatorHelper=%p",
+         deflection,
+         gMediatorHelper);
+    if (nullptr == gMediatorHelper) {
+        gMediatorHelper = scCreateMediator();
     }
-    threadData->initializedSignal->raiseSignal();
-    if (threadData->bError) {
+    int currDeflection = 0;
+    int res = scFetchDeflection(gMediatorHelper, currDeflection);
+    LOGI("scUpdateRelativeDeflection currDeflection=%d res=%d", currDeflection, res);
+    if (0 != res) {
         return;
     }
-    while (!threadData->bTerminated) {
-        res = threadData->layerFetcher->fetchingLayer();
-        usleep(1000);
-        if (0 == res) {
-            usleep(1000);
-            continue;
+    int newDeflection = deflection;
+//    int newDeflection = currDeflection + deflection;
+    scUpdateDeflection(gMediatorHelper, newDeflection);
+    LOGI("scUpdateRelativeDeflection done newDeflection=%d", newDeflection);
+}
+// willie change done 2020-8-20
+
+SVRP_EXPORT int scGetOfflineMapRelocState() {
+    if (gAppContext->mUseIvSlam) {
+        if (gAppContext->ivslamHelper) {
+            return IvSlamClient_GetOfflineMapRelocState(gAppContext->ivslamHelper);
         }
     }
-    LOGI("InVisionController::layerThreadHandler out of while loop");
-    threadData->layerFetcher->releaseSocket();
-    threadData->endRenderingSignal->raiseSignal();
-    LOGI("InVisionController::layerThreadHandler done");
+    return 1;
+}
+
+SVRP_EXPORT void scResaveMap(const char *path) {
+    LOGI("scResaveMap path=%s", path);
+    if (gAppContext->mUseIvSlam) {
+        if (gAppContext->ivslamHelper) {
+            IvSlamClient_ReSaveMapMap(gAppContext->ivslamHelper, path);
+        }
+    }
+}
+
+SVRP_EXPORT void scGetGnss(double &dt, float *gnss) {
+    if (gAppContext->mUseIvSlam) {
+        if (gAppContext->ivslamHelper) {
+            IvSlamClient_GetGnss(gAppContext->ivslamHelper, dt, gnss);
+        }
+    }
+}
+
+SVRP_EXPORT int scGetPanel() {
+    if (gAppContext->mUseIvSlam) {
+        if (gAppContext->ivslamHelper) {
+            IvSlamClient_GetPanel(gAppContext->ivslamHelper, mPanelSize, mPanelInfo);
+            return mPanelSize;
+        }
+    } else {
+#if 1   // for debug
+        // float debugINfo[68*3] = {0};
+        float panel1[
+                2 + 16 * 3] = {0, 16, 7.92049, -0.700962, -4.44806, 7.76381, -0.700962, -5.2852,
+                               7.61105, -0.700962, -5.4551, 7.1606, -0.700962, -5.82642, 5.68592,
+                               -0.700962, -6.77381, 5.24447, -0.700962, -6.96169, 3.60803,
+                               -0.700962, -5.63783, 3.0853, -0.700962, -5.16815, 2.5626, -0.700962,
+                               -4.62051, -1.73509, -0.700962, 1.0777, -1.80119, -0.700962, 1.19153,
+                               -1.77043, -0.700962, 1.60757, -1.40965, -0.700962, 2.66776, -1.01016,
+                               -0.700962, 2.54142, -0.421896, -0.700962, 2.25137, 7.56967,
+                               -0.700962, -4.14651};
+        float panel2[
+                2 + 15 * 3] = {1, 15, 7.18651, 0.0408566, -5.29466, 6.66501, 0.0408566, -8.08702,
+                               6.64586, 0.0408566, -8.16221, 6.48848, 0.0408566, -8.45531, 5.49706,
+                               0.0408566, -9.90318, 5.39325, 0.0408566, -9.98688, 5.04886,
+                               0.0408566, -10.2294, 3.08607, 0.0408566, -10.7128, 2.2504, 0.0408566,
+                               -10.6664, -1.59317, 0.0408566, -8.22763, -1.64592, 0.0408566,
+                               -8.10943, -4.62121, 0.0408566, 1.00143, -2.6467, 0.0408566, 2.6492,
+                               0.687408, 0.0408566, 0.917342, 7.05291, 0.0408566, -4.61748};
+        float panel3[
+                2 + 11 * 3] = {2, 11, 2.28344, -0.715485, -6.18769, 1.91045, -0.715485, -6.43061,
+                               1.7313, -0.715485, -6.43367, 0.545626, -0.715485, -6.1697, -1.03625,
+                               -0.715485, -1.53992, -0.993108, -0.715485, -1.3585, -0.589472,
+                               -0.715485, -0.649404, -0.460017, -0.715485, -0.659332, 0.708583,
+                               -0.715485, -1.28122, 2.19297, -0.715485, -4.83388, 2.27938,
+                               -0.715485, -5.34684};
+        memcpy(mPanelInfo, panel1, sizeof(float) * (2 + 16 * 3));
+        memcpy(mPanelInfo + 68, panel2, sizeof(float) * (2 + 15 * 3));
+        memcpy(mPanelInfo + 68 + 68, panel3, sizeof(float) * (2 + 11 * 3));
+
+        mPanelSize = 3;
+        return 3;
+#endif
+    }
+    mPanelSize = 0;
+    return 0;
+}
+
+SVRP_EXPORT void scGetPanelInfo(float *info) {
+    if (mPanelSize > 0) {
+        memcpy(info, mPanelInfo, sizeof(float) * mPanelSize * 68);
+    }
+}
+
+//add zengchuiguo 20200724 (start)
+static uint64_t last_index = 0;
+SVRP_EXPORT int scHANDTRACK_Start(LOW_POWER_WARNING_CALLBACK callback) {
+    LOGI("%s start", __FUNCTION__);
+    if (gAppContext) {
+        if (gAppContext->ivgestureClientHelper != nullptr) {
+            last_index = 0;
+            gAppContext->mIvGestureStarted = true;
+            IvGestureClient_Start(gAppContext->ivgestureClientHelper, callback);
+        }
+    }
+    return 0;
+}
+
+SVRP_EXPORT int scHANDTRACK_Stop() {
+    LOGI("%s start", __FUNCTION__);
+    if (gAppContext) {
+        if (gAppContext->ivgestureClientHelper != nullptr) {
+            LOGI("%s try stop the gesture client", __FUNCTION__);
+            IvGestureClient_Stop(gAppContext->ivgestureClientHelper);
+            gAppContext->mIvGestureStarted = false;
+        }
+    } else {
+        LOGE("%s gAppContext was invalid!!!", __FUNCTION__);
+    }
+    LOGI("%s end", __FUNCTION__);
+    return 0;
+}
+
+
+SVRP_EXPORT int scHANDTRACK_GetGesture(uint64_t *index, float *model, float *pose) {
+    LOGI("%s start2233",__FUNCTION__);
+    if (gAppContext) {
+        if (gAppContext->ivgestureClientHelper != nullptr) {
+            IvGestureClient_GetGesture(gAppContext->ivgestureClientHelper, index, model, pose);
+            int mindex = 0;
+            int handnum = model[mindex++];
+            LOGI("%s handnum = {%f %f %f %f} {%f %f %f}}",__FUNCTION__,model[0],model[1],model[2],model[3],pose[0],pose[1],pose[2]);
+            if(handnum > 0){
+                svrHeadPoseState poseState;
+                glm::quat poseRot{1, 0, 0, 0};
+                glm::vec3 posePos{0};
+                poseState.poseStatus = 0;
+                poseState.pose.rotation.x = poseRot.x;
+                poseState.pose.rotation.y = poseRot.y;
+                poseState.pose.rotation.z = poseRot.z;
+                poseState.pose.rotation.w = poseRot.w;
+                poseState.pose.position.x = posePos.x;
+                poseState.pose.position.y = posePos.y;
+                poseState.pose.position.z = posePos.z;
+                glm::mat4 transformLeftM = glm::mat4(1);
+                glm::mat4 transformRightM = glm::mat4(1);
+                poseState = svrGetPredictedHeadPoseExt(svrGetPredictedDisplayTime(),true);
+
+                glm::quat rotation;
+                rotation.x = poseState.pose.rotation.x;
+                rotation.y = poseState.pose.rotation.y;
+                rotation.z = poseState.pose.rotation.z;
+                rotation.w = poseState.pose.rotation.w;
+                if(gAppContext->useTransformMatrix){
+                    rotation = glm::inverse(gAppContext->correctYQuat) * rotation;
+                }
+
+                glm::vec3 position;
+                position.x = poseState.pose.position.x;
+                position.y = poseState.pose.position.y;
+                position.z = poseState.pose.position.z;
+
+                glm::mat4 poseM = glm::mat4_cast(rotation);
+                glm::mat4 viewM = glm::translate(glm::mat4_cast(rotation), position);
+
+
+                float LandRotLeft[16] = {0.0f, 1.0f, 0.0f, 0.0f,
+                                         -1.0f, 0.0f, 0.0f, 0.0f,
+                                         0.0f, 0.0f, 1.0f, 0.0f,
+                                         0.0f, 0.0f, 0.0f, 1.0f};
+                glm::mat4 LandRotLeft_glm = glm::make_mat4(LandRotLeft);
+
+                glm::mat4 changeM = glm::inverse(viewM); //* glm::transpose(LandRotLeft_glm);
+
+                //glm::mat4 changeM = viewM * LandRotLeft_glm;
+
+                LOGE("MY_TAG","do not inverse");
+
+                for(int i=0;i<handnum;i++){
+                    int c = model[mindex++];
+                    int jointNum = model[mindex++];
+                    for(int j = 0;j < jointNum;j++){
+                        glm::vec4 p(model[mindex] ,model[mindex+1],model[mindex+2],1.0);
+                        p = changeM * p;
+                        model[mindex] = p[0];
+                        model[mindex+ 1] = p[1];
+                        model[mindex+ 2] = -p[2];
+                        mindex +=3;
+                    }
+                }
+
+
+            }
+
+
+            if (last_index != *index) {
+                last_index = *index;
+#ifdef DUMP_HAND_INFO
+                dump_float_buffer_to_txt("data_svr",*index,model,256);
+#endif
+            }
+        }
+    }
+    return 0;
+}
+
+static void destroyIvGesture() {
+    LOGI("%s", __FUNCTION__);
+    if (gAppContext->ivgestureClientHelper) {
+        if (gAppContext->mIvGestureStarted) {
+            LOGI("Stop the gesture services and destory it");
+            IvGestureClient_Stop(gAppContext->ivgestureClientHelper);
+            gAppContext->mIvGestureStarted = false;
+        }
+        IvGestureClient_Destroy(gAppContext->ivgestureClientHelper);
+    }
+}
+
+SVRP_EXPORT void scHANDTRACK_SetGestureCallback(GESTURE_CHANGE_CALLBACK callback) {
+    LOGI("%s start",__FUNCTION__);
+    if (gAppContext) {
+        if (gAppContext->ivgestureClientHelper != nullptr) {
+            IvGestureClient_SetGestureChangeCallback(gAppContext->ivgestureClientHelper, callback);
+        }
+    }
+}
+
+SVRP_EXPORT void
+scHANDTRACK_SetGestureModelDataCallback(GESTURE_MODEL_DATA_CHANGE_CALLBACK callback) {
+    LOGI("%s start",__FUNCTION__);
+    if (gAppContext) {
+        if (gAppContext->ivgestureClientHelper != nullptr) {
+            IvGestureClient_SetGestureModelDataChangeCallback(gAppContext->ivgestureClientHelper,
+                                                              callback);
+        }
+    }
+}
+
+SVRP_EXPORT void scHANDTRACK_SetLowPowerWarningCallback(LOW_POWER_WARNING_CALLBACK callback) {
+    if (gAppContext) {
+        if (gAppContext->ivgestureClientHelper != nullptr) {
+            LOGI("%s, set low power warning callback", __FUNCTION__);
+            IvGestureClient_SetLowPowerWarningCallback(gAppContext->ivgestureClientHelper,
+                                                       callback);
+        } else {
+            LOGE("%s, ivgestureClientHelper was invalid", __FUNCTION__);
+        }
+    } else {
+        LOGE("%s, gAppContext was invalid", __FUNCTION__);
+    }
+}
+
+SVRP_EXPORT void scHANDTRACK_setGestureData(float *model, float *pose) {
+    LOGE("%s start",__FUNCTION__);
+    if (gAppContext) {
+        if (gAppContext->ivgestureClientHelper != nullptr) {
+            IvGestureClient_SetGestureData(gAppContext->ivgestureClientHelper, model, pose);
+        }
+    }
+}
+
+SVRP_EXPORT void sc_setAppExitCallback(APP_EXIT_CALLBACK callback) {
+    LOGI("%s start", __FUNCTION__);
+    if (gAppContext) {
+        if (gAppContext->ivslamHelper != nullptr) {
+            IvSlamClient_SetAppExitCallback(gAppContext->ivslamHelper, callback);
+        } else {
+            LOGE("%s, slam helper was invalid!!!", __FUNCTION__);
+        }
+    } else {
+        LOGE("%s, gAppContext was invalid!!!", __FUNCTION__);
+    }
+}
+//add zengchuiguo 20200724 (end)
+
+// add by chenweihua 20201026 (start)
+
+SVRP_EXPORT int scFetchHandShank(float *orientationArray, int lr) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            if (gAppContext->bond == 0) {
+                gAppContext->bond = scHandShank_Getbond();
+            }
+
+            if (gAppContext->bond == 34) { // K11
+                return scFetch3dofHandShankNew(orientationArray, lr);
+            } else if (gAppContext->bond == 17) { // K102
+                return scFetch6dofHandShank(orientationArray, lr);
+            }
+        }
+    }
+
+    return -1;
+}
+
+SVRP_EXPORT int scFetch6dofHandShank(float *orientationArray, int lr) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            double time;
+
+            int result = HandShankClient_GetPose(gAppContext->ivhandshankHelper, orientationArray,
+                                                 time, lr);
+
+            if (result < 0) {
+                return result;
+            }
+
+            svrHeadPoseState poseState;
+            poseState.poseStatus |= kTrackingPosition;
+
+            float translation[3] = {0};
+            float rotation[4] = {0};
+
+            glm::mat4 poseMatrix = glm::make_mat4(orientationArray);
+            translation[0] = poseMatrix[3][0];
+            translation[1] = poseMatrix[3][1];
+            translation[2] = poseMatrix[3][2];
+
+            poseMatrix[3][0] = 0;
+            poseMatrix[3][1] = 0;
+            poseMatrix[3][2] = 0;
+
+            glm::quat outData_rotationQuaternion = glm::quat_cast(poseMatrix);
+            rotation[0] = outData_rotationQuaternion.x;
+            rotation[1] = outData_rotationQuaternion.y;
+            rotation[2] = outData_rotationQuaternion.z;
+            rotation[3] = outData_rotationQuaternion.w;
+
+            L_TrackingToReturn_for_handshank(poseState, NULL, NULL, NULL, NULL, 0.0f, rotation,
+                                             translation);
+            orientationArray[0] = poseState.pose.position.x;
+            orientationArray[1] = poseState.pose.position.y;
+            orientationArray[2] = poseState.pose.position.z;
+            orientationArray[3] = poseState.pose.rotation.x;
+            orientationArray[4] = poseState.pose.rotation.y;
+            orientationArray[5] = poseState.pose.rotation.z;
+            orientationArray[6] = poseState.pose.rotation.w;
+
+            return 0;
+        }
+    }
+    return -1;
+}
+
+SVRP_EXPORT int scFetch3dofHandShankNew(float *orientationArray, int lr) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_GetImu(gAppContext->ivhandshankHelper, gAppContext->handshank_imu, lr);
+
+            if (gAppContext->handshank_imu.size() > 0) {
+                float x = gAppContext->handshank_imu.back().quaternion[0];
+                float y = gAppContext->handshank_imu.back().quaternion[1];
+                float z = gAppContext->handshank_imu.back().quaternion[2];
+                float w = gAppContext->handshank_imu.back().quaternion[3];
+
+                // gAppContext->handshank_imu.erase(gAppContext->handshank_imu.begin(), gAppContext->handshank_imu.begin() + gAppContext->handshank_imu.size());
+                gAppContext->handshank_imu.clear();
+
+                svrHeadPoseState poseState = svrGetPredictedHeadPose(svrGetPredictedDisplayTimePipelined(1));
+
+                if (lr == 0) {
+                    orientationArray[0] = poseState.pose.position.x + 0.15f;
+                    orientationArray[1] = poseState.pose.position.y + 0.25f;
+                    orientationArray[2] = poseState.pose.position.z + 0.25f;
+                } else {
+                    orientationArray[0] = poseState.pose.position.x - 0.15f;
+                    orientationArray[1] = poseState.pose.position.y + 0.25f;
+                    orientationArray[2] = poseState.pose.position.z + 0.25f;
+                }
+
+                orientationArray[3] = -x;
+                orientationArray[4] = -y;
+                orientationArray[5] = z;
+                orientationArray[6] = w;
+
+                return 0;
+            }
+        }
+    }
+    return -1;
+}
+
+SVRP_EXPORT int scFetch3dofHandShank(float *orientationArray, int lr) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_GetImu(gAppContext->ivhandshankHelper, gAppContext->handshank_imu, lr);
+
+            if (gAppContext->handshank_imu.size() > 0) {
+                float x = gAppContext->handshank_imu.back().quaternion[0];
+                float y = gAppContext->handshank_imu.back().quaternion[1];
+                float z = gAppContext->handshank_imu.back().quaternion[2];
+                float w = gAppContext->handshank_imu.back().quaternion[3];
+
+                // gAppContext->handshank_imu.erase(gAppContext->handshank_imu.begin(), gAppContext->handshank_imu.begin() + gAppContext->handshank_imu.size());
+                gAppContext->handshank_imu.clear();
+
+                orientationArray[0] = 1.0f - 2.0f * y * y - 2.0f * z * z;
+                orientationArray[4] = 2.0f * x * y - 2.0f * z * w;
+                orientationArray[8] = 2.0f * x * z + 2.0f * y * w;
+                orientationArray[12] = 0.0f;
+                orientationArray[1] = 2.0f * x * y + 2.0f * z * w;
+                orientationArray[5] = 1.0f - 2.0f * x * x - 2.0f * z * z;
+                orientationArray[9] = 2.0f * y * z - 2.0f * x * w;
+                orientationArray[13] = 0.0f;
+                orientationArray[2] = 2.0f * x * z - 2.0f * y * w;
+                orientationArray[6] = 2.0f * y * z + 2.0f * x * w;
+                orientationArray[10] = 1.0f - 2.0f * x * x - 2.0f * y * y;
+                orientationArray[14] = 0.0f;
+                orientationArray[3] = 0.0f;
+                orientationArray[7] = 0.0f;
+                orientationArray[11] = 0.0f;
+                orientationArray[15] = 1.0f;
+                return 0;
+            }
+        }
+    }
+    return -1;
+}
+
+SVRP_EXPORT void scHandShank_SetKeyEventCallback(HANDSHANK_KEY_EVENT_CALLBACK callback) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_RegisterKeyEventCB(gAppContext->ivhandshankHelper, callback);
+        }
+    }
+}
+
+SVRP_EXPORT void scHandShank_SetKeyTouchEventCallback(HANDSHANK_KEY_TOUCH_EVENT_CALLBACK callback) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_RegisterKeyTouchEventCB(gAppContext->ivhandshankHelper, callback);
+        }
+    }
+}
+
+SVRP_EXPORT void scHandShank_SetTouchEventCallback(HANDSHANK_TOUCH_EVENT_CALLBACK callback) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_RegisterTouchEventCB(gAppContext->ivhandshankHelper, callback);
+        }
+    }
+}
+
+SVRP_EXPORT void scHandShank_SetHallEventCallback(HANDSHANK_HALL_EVENT_CALLBACK callback) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_RegisterHallEventCB(gAppContext->ivhandshankHelper, callback);
+        }
+    }
+}
+
+SVRP_EXPORT void scHandShank_SetChargingEventCallback(HANDSHANK_CHARGING_EVENT_CALLBACK callback) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_RegisterChargingEventCallback(gAppContext->ivhandshankHelper, callback);
+        }
+    }
+}
+
+SVRP_EXPORT void scHandShank_SetBatteryEventCallback(HANDSHANK_BATTERY_EVENT_CALLBACK callback) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_RegisterBatteryEventCallback(gAppContext->ivhandshankHelper, callback);
+        }
+    }
+}
+
+SVRP_EXPORT void scHandShank_SetConnectEventCallback(HANDSHANK_CONNECT_EVENT_CALLBACK callback) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_RegisterConnectEventCallback(gAppContext->ivhandshankHelper, callback);
+        }
+    }
+}
+
+SVRP_EXPORT int scHandShank_GetBattery(int lr) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            return HandShankClient_GetBattery(gAppContext->ivhandshankHelper, lr);
+        }
+    }
+
+    return 0;
+}
+
+SVRP_EXPORT bool scHandShank_GetConnectState(int lr) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            return HandShankClient_GetConnectState(gAppContext->ivhandshankHelper, lr);
+        }
+    }
+
+    return false;
+}
+
+SVRP_EXPORT int scHandShank_GetVersion() {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            return HandShankClient_GetVersion(gAppContext->ivhandshankHelper);
+        }
+    }
+
+    return 0;
+}
+
+SVRP_EXPORT int scHandShank_Getbond() {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            return HandShankClient_Getbond(gAppContext->ivhandshankHelper);
+        }
+    }
+
+    return 0;
+}
+
+SVRP_EXPORT void scHandShank_LedControl(int enable) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_LedControl(gAppContext->ivhandshankHelper, enable);
+        }
+    }
+}
+
+SVRP_EXPORT void scHandShank_VibrateControl(int value) {
+    if (gAppContext) {
+        if (gAppContext->ivhandshankHelper != nullptr) {
+            HandShankClient_VibrateControl(gAppContext->ivhandshankHelper, value);
+        }
+    }
+}
+
+SvrResult svrGetTransformMatrix(bool &outBLoaded, float *outTransformArray) {
+    LOGI("svrGetTransformMatrix start gAppContext=%p", gAppContext);
+    if (nullptr == gAppContext) {
+        return SVR_ERROR_VRMODE_NOT_INITIALIZED;
+    }
+    outBLoaded = gAppContext->useTransformMatrix;
+    if (gAppContext->useTransformMatrix) {
+        memcpy(outTransformArray, glm::value_ptr(gAppContext->transformMatrixArray[0]),
+               sizeof(glm::mat4));
+        memcpy(outTransformArray + 16, glm::value_ptr(gAppContext->transformMatrixArray[1]),
+               sizeof(glm::mat4));
+    }
+    return SVR_ERROR_NONE;
+}
+
+svrHeadPoseState
+svrGetLatestEyeMatrices(float *outLeftEyeMatrix, float *outRightEyeMatrix, float *outT, float *outR,
+                        float predictedTimeMs) {
+    svrHeadPoseState poseState;
+    glm::quat poseRot{1, 0, 0, 0};
+    glm::vec3 posePos{0};
+    poseState.poseStatus = 0;
+    poseState.pose.rotation.x = poseRot.x;
+    poseState.pose.rotation.y = poseRot.y;
+    poseState.pose.rotation.z = poseRot.z;
+    poseState.pose.rotation.w = poseRot.w;
+    poseState.pose.position.x = posePos.x;
+    poseState.pose.position.y = posePos.y;
+    poseState.pose.position.z = posePos.z;
+    if (nullptr == gAppContext) {
+        return poseState;
+    }
+    glm::mat4 transformLeftM = glm::mat4(1);
+    glm::mat4 transformRightM = glm::mat4(1);
+    poseState = svrGetPredictedHeadPose(predictedTimeMs);
+    glm::quat rotation;
+    rotation.x = poseState.pose.rotation.x;
+    rotation.y = poseState.pose.rotation.y;
+    rotation.z = poseState.pose.rotation.z;
+    rotation.w = poseState.pose.rotation.w;
+    glm::vec3 position;
+    position.x = poseState.pose.position.x;
+    position.y = poseState.pose.position.y;
+    position.z = poseState.pose.position.z;
+
+    constexpr float IPD = 0.064f;
+    float deflectionRadians = glm::radians(gDeflection);
+    glm::mat4 leftEyeOffsetMat = glm::rotate(glm::mat4(1), deflectionRadians, glm::vec3(0, 1, 0));
+    glm::mat4 rightEyeOffsetMat = glm::rotate(glm::mat4(1), -deflectionRadians, glm::vec3(0, 1, 0));
+    leftEyeOffsetMat = glm::translate(leftEyeOffsetMat, glm::vec3(0.5f * IPD, 0, 0));
+    rightEyeOffsetMat = glm::translate(rightEyeOffsetMat, glm::vec3(-0.5f * IPD, 0, 0));
+//    glm::mat4 poseM = glm::mat4_cast(rotation);
+    glm::mat4 viewM = glm::translate(glm::mat4_cast(rotation), position);
+    glm::mat4 leftEyeMatrix = gAppContext->transformMatrixArray[0] * leftEyeOffsetMat * viewM;
+    glm::mat4 rightEyeMatrix = gAppContext->transformMatrixArray[1] * rightEyeOffsetMat * viewM;
+    memcpy(outLeftEyeMatrix, glm::value_ptr(leftEyeMatrix), sizeof(float) * 16);
+    memcpy(outRightEyeMatrix, glm::value_ptr(rightEyeMatrix), sizeof(float) * 16);
+    memcpy(outT, glm::value_ptr(position), sizeof(glm::vec3));
+    memcpy(outR, glm::value_ptr(rotation), sizeof(glm::quat));
+//    LOGI("outLeftEyeMatrix = [%f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f]",
+//         leftEyeMatrix[0][0], leftEyeMatrix[1][0], leftEyeMatrix[2][0], leftEyeMatrix[3][0],
+//         leftEyeMatrix[0][1], leftEyeMatrix[1][1], leftEyeMatrix[2][1], leftEyeMatrix[3][1],
+//         leftEyeMatrix[0][2], leftEyeMatrix[1][2], leftEyeMatrix[2][2], leftEyeMatrix[3][2],
+//         leftEyeMatrix[0][3], leftEyeMatrix[1][3], leftEyeMatrix[2][3], leftEyeMatrix[3][3]);
+//    LOGI("rightEyeMatrix = [%f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f]",
+//         rightEyeMatrix[0][0], rightEyeMatrix[1][0], rightEyeMatrix[2][0], rightEyeMatrix[3][0],
+//         rightEyeMatrix[0][1], rightEyeMatrix[1][1], rightEyeMatrix[2][1], rightEyeMatrix[3][1],
+//         rightEyeMatrix[0][2], rightEyeMatrix[1][2], rightEyeMatrix[2][2], rightEyeMatrix[3][2],
+//         rightEyeMatrix[0][3], rightEyeMatrix[1][3], rightEyeMatrix[2][3], rightEyeMatrix[3][3]);
+//    LOGI("outT=[%f, %f, %f], outR=[%f, %f, %f, %f]", outT[0], outT[1], outT[2], outR[0], outR[1], outR[2], outR[3]);
+    return poseState;
+}
+
+SvrResult svrGetLatestCameraBinocularData(bool &outBUpdate, uint32_t &outFrameIndex,
+                                          uint64_t &outFrameExposureNano,
+                                          uint8_t *outLeftFrameData,
+                                          uint8_t *outRightFrameData) {
+    outBUpdate = false;
+    int availableIndex = -1;
+    {
+        std::unique_lock<std::mutex> autoLock(gAppContext->cameraMutex);
+        availableIndex = gAppContext->availableCameraBufferIdx;
+    }
+    if (-1 == availableIndex || -1 == gCameraFrameIndexArray[availableIndex]) {
+        LOGI("svrGetLatestCameraBinocularData skip for availableIndex=%d", availableIndex);
+        return SVR_ERROR_NONE;
+    }
+    if (outFrameIndex != gCameraFrameIndexArray[availableIndex]) {
+        // copy left half qvr camera data
+        int halfWidth = gAppContext->cameraWidth / 2;
+        for (int idx = 0; idx != gAppContext->cameraHeight; ++idx) {
+            memcpy(outLeftFrameData + idx * halfWidth,
+                   gCameraFrameDataArray[availableIndex].dataArray +
+                   idx * gAppContext->cameraWidth, sizeof(uint8_t) * halfWidth);
+            memcpy(outRightFrameData + idx * halfWidth,
+                   gCameraFrameDataArray[availableIndex].dataArray +
+                   halfWidth + idx * gAppContext->cameraWidth, sizeof(uint8_t) * halfWidth);
+        }
+        outFrameIndex = gCameraFrameIndexArray[availableIndex];
+        outFrameExposureNano = gCameraFrameDataArray[availableIndex].exposureNano;
+        outBUpdate = true;
+    }
+    return SVR_ERROR_NONE;
 }
 
 SVRP_EXPORT int scInitLayer() {
@@ -3605,35 +4796,27 @@ SVRP_EXPORT int scInitLayer() {
     return 0;
 }
 
+// for A11B
 void updateLayerVertex(LayerVertex &outLayerVertex,
                        LayerData &layerData) {
     float windowWidth = gAppContext->deviceInfo.displayWidthPixels / 2;
     float windowHeight = gAppContext->deviceInfo.displayHeightPixels;
     int left = 0;
     int top = 0;
-    int width = 1080;
-    int height = 1200;
+    int width = 1200;
+    int height = 1080;
     int real_left = layerData.regionArray[0];
     int real_top = layerData.regionArray[1];
-    int real_width = layerData.regionArray[2] + real_left;
-    int real_height = layerData.regionArray[3] + real_top;
-    if (real_left < 0) {
-        real_left = 0;
-    }
-    if (real_top < 0) {
-        real_top = 0;
-    }
+    int real_width = layerData.regionArray[2];
+    int real_height = layerData.regionArray[3];
 
     if (0 == real_width) {
-        real_width = windowWidth;
+        real_width = width;
     }
     if (0 == real_height) {
-        real_height = windowHeight;
+        real_height = height;
     }
-    // float oriLeft = left / windowWidth;
-    // float oriTop = (windowHeight - top) / windowHeight;
-    // float oriRight = (left + width) / windowWidth;
-    // float oriBottom = (windowHeight - top - height) / windowHeight;
+
     float offsetX = (windowWidth - width) / 2;
     float offsetY = (windowHeight - height) / 2;
     float oriLeft = (left + offsetX) / windowWidth;
@@ -3651,13 +4834,9 @@ void updateLayerVertex(LayerVertex &outLayerVertex,
     if (oriRight > 1) {
         oriRight = 1;
     }
-    // float vertexLeft = oriLeft;
     float vertexLeft = (oriRight - oriLeft) * real_left / width + oriLeft;
-    // float vertexRight = oriRight;
     float vertexRight = (oriRight - oriLeft) * real_width / width + oriLeft;
-    // float vertexTop = oriTop;
     float vertexTop = (oriBottom - oriTop) * real_top / height + oriTop;
-    // float vertexBottom = oriBottom;
     float vertexBottom = (oriBottom - oriTop) * real_height / height + oriTop;
     float aspectRatio = 1.0f;
     vertexTop = (1.0f - aspectRatio) / 2 + vertexTop * aspectRatio;
@@ -3726,37 +4905,119 @@ void updateLayerVertex(LayerVertex &outLayerVertex,
         outLayerVertex.vertexUV[7] = uvTop;
     }
 }
+/*
+void updateLayerVertex(LayerVertex &outLayerVertex,
+                       LayerData &layerData) {
+    float windowWidth = gAppContext->deviceInfo.displayWidthPixels / 2;
+    float windowHeight = gAppContext->deviceInfo.displayHeightPixels;
+    int left = layerData.regionArray[0];
+    int top = layerData.regionArray[1];
+    int width = layerData.regionArray[2];
+    int height = layerData.regionArray[3];
+    if (left < 0) {
+        left = 0;
+    }
+    if (top < 0) {
+        top = 0;
+    }
 
+    if (0 == width) {
+        width = windowWidth;
+    }
+    if (0 == height) {
+        height = windowHeight;
+    }
+    float oriLeft = left / windowWidth;
+    float oriTop = (windowHeight - top) / windowHeight;
+    float oriRight = (left + width) / windowWidth;
+    float oriBottom = (windowHeight - top - height) / windowHeight;
+    float oriWidth = width / windowWidth;
+    float oriHeight = height / windowHeight;
+    if (oriBottom < 0) {
+        oriBottom = 0;
+    }
+    if (oriRight > 1) {
+        oriRight = 1;
+    }
+    float vertexLeft = oriLeft;
+    float vertexRight = oriRight;
+    float vertexTop = oriTop;
+    float vertexBottom = oriBottom;
+    float aspectRatio = 1.0f;
+    vertexTop = (1.0f - aspectRatio) / 2 + vertexTop * aspectRatio;
+    vertexBottom = (1.0f - aspectRatio) / 2 + vertexBottom * aspectRatio;
+
+    float xRatio = gAppContext->deviceInfo.leftEyeFrustum.right /
+                   gAppContext->deviceInfo.leftEyeFrustum.near;
+    float yRatio = gAppContext->deviceInfo.leftEyeFrustum.top /
+                   gAppContext->deviceInfo.leftEyeFrustum.near;
+    vertexLeft = (vertexLeft * 2 - 1) * xRatio;
+    vertexRight = (vertexRight * 2 - 1) * xRatio;
+    vertexTop = (vertexTop * 2 - 1) * yRatio;
+    vertexBottom = (vertexBottom * 2 - 1) * yRatio;
+    outLayerVertex.vertexPosition[0] = vertexLeft;
+    outLayerVertex.vertexPosition[1] = vertexBottom;
+    outLayerVertex.vertexPosition[2] = 0;
+    outLayerVertex.vertexPosition[3] = vertexRight;
+    outLayerVertex.vertexPosition[4] = vertexBottom;
+    outLayerVertex.vertexPosition[5] = 0;
+    outLayerVertex.vertexPosition[6] = vertexLeft;
+    outLayerVertex.vertexPosition[7] = vertexTop;
+    outLayerVertex.vertexPosition[8] = 0;
+    outLayerVertex.vertexPosition[9] = vertexRight;
+    outLayerVertex.vertexPosition[10] = vertexTop;
+    outLayerVertex.vertexPosition[11] = 0;
+
+    float uvLeft = 0;
+    float uvRight = 1;
+    float uvTop = 0;
+    float uvBottom = 1;
+    if (layerData.bHasTransparentRegion) {
+        if (0 == layerData.textureTransform) {
+            uvBottom = oriHeight;
+        } else if (4 == layerData.textureTransform) {
+            uvRight = oriHeight;
+        } else if (7 == layerData.textureTransform) {
+            uvLeft = 1 - oriHeight;
+        }
+    }
+    outLayerVertex.vertexUV[0] = uvLeft;
+    outLayerVertex.vertexUV[1] = uvBottom;
+    outLayerVertex.vertexUV[2] = uvRight;
+    outLayerVertex.vertexUV[3] = uvBottom;
+    outLayerVertex.vertexUV[4] = uvLeft;
+    outLayerVertex.vertexUV[5] = uvTop;
+    outLayerVertex.vertexUV[6] = uvRight;
+    outLayerVertex.vertexUV[7] = uvTop;
+    if (7 == layerData.textureTransform) {
+        outLayerVertex.vertexUV[0] = uvLeft;
+        outLayerVertex.vertexUV[1] = uvTop;
+        outLayerVertex.vertexUV[2] = uvLeft;
+        outLayerVertex.vertexUV[3] = uvBottom;
+        outLayerVertex.vertexUV[4] = uvRight;
+        outLayerVertex.vertexUV[5] = uvTop;
+        outLayerVertex.vertexUV[6] = uvRight;
+        outLayerVertex.vertexUV[7] = uvBottom;
+    } else if (4 == layerData.textureTransform) {
+        outLayerVertex.vertexUV[0] = uvRight;
+        outLayerVertex.vertexUV[1] = uvBottom;
+        outLayerVertex.vertexUV[2] = uvRight;
+        outLayerVertex.vertexUV[3] = uvTop;
+        outLayerVertex.vertexUV[4] = uvLeft;
+        outLayerVertex.vertexUV[5] = uvBottom;
+        outLayerVertex.vertexUV[6] = uvLeft;
+        outLayerVertex.vertexUV[7] = uvTop;
+    }
+}
+*/
 SVRP_EXPORT int scStartLayerRendering() {
     if (nullptr == mLayerFetcher) {
         return -1;
     }
-    //update view matrix
-    float predDispTime = svrGetPredictedDisplayTime();
-    svrHeadPoseState poseState = svrGetPredictedHeadPose(predDispTime);
-    glm::fquat poseQuat = glm::fquat(poseState.pose.rotation.w, poseState.pose.rotation.x,
-                                     poseState.pose.rotation.y, poseState.pose.rotation.z);
-    glm::vec3 headOffset = glm::vec3(0);
-    if ((poseState.poseStatus | kTrackingPosition) != 0) {
-        //Positional tracking is enabled so use that positional data from the pose
-        headOffset.x = poseState.pose.position.x;
-        headOffset.y = poseState.pose.position.y;
-        headOffset.z = poseState.pose.position.z;
-    }
-    glm::mat4 offsetMat = glm::translate(glm::mat4(1.0f), headOffset);
-    mViewMatrix = glm::mat4_cast(poseQuat) * offsetMat;
-    float yaw = atan2(mViewMatrix[2][0], mViewMatrix[2][2]);
-    mDragViewQuaternion.w = cos(yaw * 0.5);
-    mDragViewQuaternion.x = 0;
-    mDragViewQuaternion.y = sin(yaw * 0.5);
-    mDragViewQuaternion.z = 0;
-    if (-1 == mLayerFetcher->sendConnectionSocket(glm::value_ptr(mViewMatrix))) {
-        WLOGE("scStartLayerRendering sendConnectionSocket return -1");
-        return -1;
-    }
+
     int currLayerNum = 0;
     {
-        InVisionMutex::AutoLock autoLock(*mLayerFetcher->getDataMutex());
+        std::unique_lock<std::mutex> autoLock(*mLayerFetcher->getDataMutex());
         auto imageMap = *(mLayerFetcher->getEGLImageMap());
         auto layerDataMap = *(mLayerFetcher->getLayerDataMap());
         WLOGI("scStartLayerRendering imageMap.size=%zu, layerDataMap.size=%zu, mLayerTextureIdVector.size=%zu",
@@ -3790,29 +5051,18 @@ SVRP_EXPORT int scStartLayerRendering() {
         }
         mLayerDataVector.clear();
         mLayerVertexVector.clear();
-/*
-        std::set<std::pair<uint32_t, LayerData>, LayerDataComparator> dataSet(layerDataMap.begin(),
-                                                                              layerDataMap.end());
-                                                                              */
-
 
         std::vector<std::pair<uint32_t, LayerData>> sortedLayerDatas;
         for (auto &i : layerDataMap) {
             sortedLayerDatas.push_back(i);
         }
-        /*
-        std::sort(sortedLayerDatas.begin(), sortedLayerDatas.end(),
-                  [](std::pair<uint32_t, LayerData> &a, std::pair<uint32_t, LayerData> &b) {
-                      return (a.second.z < b.second.z) || (a.second.z == b.second.z && a.second.layerId < b.second.layerId);
-                  });
-        */
+
         std::sort(sortedLayerDatas.begin(), sortedLayerDatas.end(),
                   [](std::pair<uint32_t, LayerData> &a, std::pair<uint32_t, LayerData> &b) {
                       return a.second.z < b.second.z;
                   });
         index = 0;
         for (const auto &element : sortedLayerDatas) {
-            // for (const auto &element : layerDataMap) {
             WLOGI("scStartLayerRendering sortedLayerDatas layerId=%u ", element.first);
             if (imageMap.find(element.first) == imageMap.end()) {
                 WLOGI("scStartLayerRendering layerId=%u not exist in imageMap", element.first);
@@ -3862,9 +5112,11 @@ SVRP_EXPORT int scGetAllLayersData(SCAllLayers *outAllLayers) {
               layerIdx, outAllLayers->layerData[layerIdx].layerId,
               outAllLayers->layerData[layerIdx].parentLayerId,
               outAllLayers->layerData[layerIdx].layerTextureId,
-              outAllLayers->layerData[layerIdx].editFlag, outAllLayers->layerData[layerIdx].taskId,
+              outAllLayers->layerData[layerIdx].editFlag,
+              outAllLayers->layerData[layerIdx].taskId,
               outAllLayers->layerData[layerIdx].z,
-              outAllLayers->layerData[layerIdx].alpha, outAllLayers->layerData[layerIdx].bOpaque,
+              outAllLayers->layerData[layerIdx].alpha,
+              outAllLayers->layerData[layerIdx].bOpaque,
               outAllLayers->layerData[layerIdx].modelMatrixData[0],
               outAllLayers->layerData[layerIdx].modelMatrixData[4],
               outAllLayers->layerData[layerIdx].modelMatrixData[8],
@@ -3970,366 +5222,6 @@ SVRP_EXPORT int scDestroyLayer() {
     return 0;
 }
 
-SVRP_EXPORT int scGetOfflineMapRelocState() {
-    if (gAppContext->mUseIvSlam) {
-        if (gAppContext->ivslamHelper) {
-            return IvSlamClient_GetOfflineMapRelocState(gAppContext->ivslamHelper);
-        }
-    }
-    return 1;
+SVRP_EXPORT bool scEnableDebugWithProperty() {
+    return gDebugWithProperty;
 }
-
-SVRP_EXPORT void scResaveMap(const char *path) {
-    WLOGI("scResaveMap path=%s", path);
-    if (gAppContext->mUseIvSlam) {
-        if (gAppContext->ivslamHelper) {
-            IvSlamClient_ReSaveMapMap(gAppContext->ivslamHelper, path);
-        }
-    }
-}
-
-SVRP_EXPORT bool isTrackingDataLost() {
-    if (gAppContext) {
-        return gAppContext->mTrackingDataLost;
-    } else {
-        return true;
-    }
-}
-
-SVRP_EXPORT int scGetPanel() {
-    if (gAppContext->mUseIvSlam) {
-        if (gAppContext->ivslamHelper) {
-            IvSlamClient_GetPanel(gAppContext->ivslamHelper, mPanelSize, mPanelInfo);
-            return mPanelSize;
-        }
-    } else {
-#if 1   // for debug
-        // float debugINfo[68*3] = {0};
-        float panel1[2 + 16 * 3] = {0, 16, 7.92049, -0.700962, -4.44806, 7.76381, -0.700962, -5.2852, 7.61105, -0.700962, -5.4551, 7.1606, -0.700962, -5.82642, 5.68592, -0.700962, -6.77381, 5.24447, -0.700962, -6.96169, 3.60803, -0.700962, -5.63783, 3.0853, -0.700962, -5.16815, 2.5626, -0.700962, -4.62051, -1.73509, -0.700962, 1.0777, -1.80119, -0.700962, 1.19153, -1.77043, -0.700962, 1.60757, -1.40965, -0.700962, 2.66776, -1.01016, -0.700962, 2.54142, -0.421896, -0.700962, 2.25137, 7.56967, -0.700962, -4.14651};
-        float panel2[2 + 15 * 3] = {1, 15, 7.18651, 0.0408566, -5.29466, 6.66501, 0.0408566, -8.08702, 6.64586, 0.0408566, -8.16221, 6.48848, 0.0408566, -8.45531, 5.49706, 0.0408566, -9.90318, 5.39325, 0.0408566, -9.98688, 5.04886, 0.0408566, -10.2294, 3.08607, 0.0408566, -10.7128, 2.2504, 0.0408566, -10.6664, -1.59317, 0.0408566, -8.22763, -1.64592, 0.0408566, -8.10943, -4.62121, 0.0408566, 1.00143, -2.6467, 0.0408566, 2.6492, 0.687408, 0.0408566, 0.917342, 7.05291, 0.0408566, -4.61748};
-        float panel3[2 + 11 * 3] = {2, 11, 2.28344, -0.715485, -6.18769, 1.91045, -0.715485, -6.43061, 1.7313, -0.715485, -6.43367, 0.545626, -0.715485, -6.1697, -1.03625, -0.715485, -1.53992, -0.993108, -0.715485, -1.3585, -0.589472, -0.715485, -0.649404, -0.460017, -0.715485, -0.659332, 0.708583, -0.715485, -1.28122, 2.19297, -0.715485, -4.83388, 2.27938, -0.715485, -5.34684};
-        memcpy(mPanelInfo, panel1, sizeof(float) * (2 + 16 * 3));
-        memcpy(mPanelInfo + 68, panel2, sizeof(float) * (2 + 15 * 3));
-        memcpy(mPanelInfo + 68 + 68, panel3, sizeof(float) * (2 + 11 * 3));
-
-        mPanelSize = 3;
-        return 3;
-#endif
-    }
-    mPanelSize = 0;
-    return 0;
-}
-
-SVRP_EXPORT void scGetPanelInfo(float *info) {
-    if (mPanelSize > 0) {
-        memcpy(info, mPanelInfo, sizeof(float) * mPanelSize * 68);
-    }
-}
-
-//add zengchuiguo 20200724 (start)
-static uint64_t last_index = 0;
-SVRP_EXPORT int scHANDTRACK_Start(LOW_POWER_WARNING_CALLBACK callback) {
-    LOGI("%s start", __FUNCTION__);
-    if (gAppContext) {
-        if (gAppContext->ivgestureClientHelper != nullptr) {
-            last_index = 0;
-            gAppContext->mIvGestureStarted = true;
-            IvGestureClient_Start(gAppContext->ivgestureClientHelper, callback);
-        }
-    }
-    return 0;
-}
-
-SVRP_EXPORT int scHANDTRACK_Stop() {
-    LOGI("%s start", __FUNCTION__);
-    if (gAppContext) {
-        if (gAppContext->ivgestureClientHelper != nullptr) {
-            LOGI("%s try stop the gesture client", __FUNCTION__);
-            IvGestureClient_Stop(gAppContext->ivgestureClientHelper);
-            gAppContext->mIvGestureStarted = false;
-        }
-    } else {
-        LOGE("%s gAppContext was invalid!!!", __FUNCTION__);
-    }
-    LOGI("%s end", __FUNCTION__);
-    return 0;
-}
-
-SVRP_EXPORT int scHANDTRACK_GetGesture(uint64_t *index, float *model, float *pose) {
-    if (gAppContext) {
-        if (gAppContext->ivgestureClientHelper != nullptr) {
-            IvGestureClient_GetGesture(gAppContext->ivgestureClientHelper, index, model, pose);
-            if (last_index != *index) {
-                last_index = *index;
-#ifdef DUMP_HAND_INFO
-                dump_float_buffer_to_txt("data_svr",*index,model,256);
-#endif
-            }
-        }
-    }
-    return 0;
-}
-
-static void destroyIvGesture() {
-    LOGI("%s", __FUNCTION__);
-    if (gAppContext->ivgestureClientHelper) {
-        if (gAppContext->mIvGestureStarted) {
-            LOGI("Stop the gesture services and destory it");
-            IvGestureClient_Stop(gAppContext->ivgestureClientHelper);
-            gAppContext->mIvGestureStarted = false;
-        }
-        IvGestureClient_Destroy(gAppContext->ivgestureClientHelper);
-    }
-}
-
-SVRP_EXPORT void scHANDTRACK_SetGestureCallback(GESTURE_CHANGE_CALLBACK callback) {
-//    LOGI("%s start",__FUNCTION__);
-    if (gAppContext) {
-        if (gAppContext->ivgestureClientHelper != nullptr) {
-            IvGestureClient_SetGestureChangeCallback(gAppContext->ivgestureClientHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT void scHANDTRACK_SetGestureModelDataCallback(GESTURE_MODEL_DATA_CHANGE_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivgestureClientHelper != nullptr) {
-            IvGestureClient_SetGestureModelDataChangeCallback(gAppContext->ivgestureClientHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT void scHANDTRACK_SetLowPowerWarningCallback(LOW_POWER_WARNING_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivgestureClientHelper != nullptr) {
-            LOGI("%s, set low power warning callback", __FUNCTION__);
-            IvGestureClient_SetLowPowerWarningCallback(gAppContext->ivgestureClientHelper, callback);
-        } else {
-            LOGE("%s, ivgestureClientHelper was invalid", __FUNCTION__);
-        }
-    } else {
-        LOGE("%s, gAppContext was invalid", __FUNCTION__);
-    }
-}
-
-SVRP_EXPORT void scHANDTRACK_setGestureData(float *model, float *pose) {
-//    LOGI("%s start",__FUNCTION__);
-    if (gAppContext) {
-        if (gAppContext->ivgestureClientHelper != nullptr) {
-            IvGestureClient_SetGestureData(gAppContext->ivgestureClientHelper, model, pose);
-        }
-    }
-}
-
-SVRP_EXPORT void sc_setAppExitCallback(APP_EXIT_CALLBACK callback) {
-//    LOGI("%s start",__FUNCTION__);
-    if (gAppContext) {
-        if (gAppContext->ivslamHelper != nullptr) {
-            IvSlamClient_SetAppExitCallback(gAppContext->ivslamHelper, callback);
-        } else {
-            LOGE("%s, slam helper was invalid!!!", __FUNCTION__);
-        }
-    } else {
-        LOGE("%s, gAppContext was invalid!!!", __FUNCTION__);
-    }
-}
-//add zengchuiguo 20200724 (end)
-
-// add by chenweihua 20201026 (start)
-SVRP_EXPORT int scFetch6dofHandShank(float *orientationArray, int lr) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            double time;
-
-            int result = HandShankClient_GetPose(gAppContext->ivhandshankHelper, orientationArray, time, lr);
-
-            if (result < 0) {
-                return result;
-            }
-
-            svrHeadPoseState poseState;
-            poseState.poseStatus |= kTrackingPosition;
-
-            float translation[3] = {0};
-            float rotation[4] = {0};
-
-            glm::mat4 poseMatrix = glm::make_mat4(orientationArray);
-            translation[0] = poseMatrix[3][0];
-            translation[1] = poseMatrix[3][1];
-            translation[2] = poseMatrix[3][2];
-
-            poseMatrix[3][0] = 0;
-            poseMatrix[3][1] = 0;
-            poseMatrix[3][2] = 0;
-
-            glm::quat outData_rotationQuaternion = glm::quat_cast(poseMatrix);
-            rotation[0] = outData_rotationQuaternion.x;
-            rotation[1] = outData_rotationQuaternion.y;
-            rotation[2] = outData_rotationQuaternion.z;
-            rotation[3] = outData_rotationQuaternion.w;
-
-            L_TrackingToReturn(poseState, NULL, NULL, NULL, NULL, 0.0f, rotation,
-                               translation);
-            orientationArray[0] = poseState.pose.position.x;
-            orientationArray[1] = poseState.pose.position.y;
-            orientationArray[2] = poseState.pose.position.z;
-            orientationArray[3] = poseState.pose.rotation.x;
-            orientationArray[4] = poseState.pose.rotation.y;
-            orientationArray[5] = poseState.pose.rotation.z;
-            orientationArray[6] = poseState.pose.rotation.w;
-
-            return 0;
-        }
-    }
-    return -1;
-}
-
-SVRP_EXPORT int scFetch3dofHandShank(float *orientationArray, int lr) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_GetImu(gAppContext->ivhandshankHelper, gAppContext->handshank_imu, lr);
-
-            if (gAppContext->handshank_imu.size() > 0) {
-                float x = gAppContext->handshank_imu.back().quaternion[0];
-                float y = gAppContext->handshank_imu.back().quaternion[1];
-                float z = gAppContext->handshank_imu.back().quaternion[2];
-                float w = gAppContext->handshank_imu.back().quaternion[3];
-
-                // gAppContext->handshank_imu.erase(gAppContext->handshank_imu.begin(), gAppContext->handshank_imu.begin() + gAppContext->handshank_imu.size());
-                gAppContext->handshank_imu.clear();
-
-                orientationArray[0] = 1.0f - 2.0f * y * y - 2.0f * z * z;
-                orientationArray[4] = 2.0f * x * y - 2.0f * z * w;
-                orientationArray[8] = 2.0f * x * z + 2.0f * y * w;
-                orientationArray[12] = 0.0f;
-                orientationArray[1] = 2.0f * x * y + 2.0f * z * w;
-                orientationArray[5] = 1.0f - 2.0f * x * x - 2.0f * z * z;
-                orientationArray[9] = 2.0f * y * z - 2.0f * x * w;
-                orientationArray[13] = 0.0f;
-                orientationArray[2] = 2.0f * x * z - 2.0f * y * w;
-                orientationArray[6] = 2.0f * y * z + 2.0f * x * w;
-                orientationArray[10] = 1.0f - 2.0f * x * x - 2.0f * y * y;
-                orientationArray[14] = 0.0f;
-                orientationArray[3] = 0.0f;
-                orientationArray[7] = 0.0f;
-                orientationArray[11] = 0.0f;
-                orientationArray[15] = 1.0f;
-                return 0;
-            }
-        }
-    }
-    return -1;
-}
-
-SVRP_EXPORT void scHandShank_SetKeyEventCallback(HANDSHANK_KEY_EVENT_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_RegisterKeyEventCB(gAppContext->ivhandshankHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT void scHandShank_SetKeyTouchEventCallback(HANDSHANK_KEY_TOUCH_EVENT_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_RegisterKeyTouchEventCB(gAppContext->ivhandshankHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT void scHandShank_SetTouchEventCallback(HANDSHANK_TOUCH_EVENT_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_RegisterTouchEventCB(gAppContext->ivhandshankHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT void scHandShank_SetHallEventCallback(HANDSHANK_HALL_EVENT_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_RegisterHallEventCB(gAppContext->ivhandshankHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT void scHandShank_SetChargingEventCallback(HANDSHANK_CHARGING_EVENT_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_RegisterChargingEventCallback(gAppContext->ivhandshankHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT void scHandShank_SetBatteryEventCallback(HANDSHANK_BATTERY_EVENT_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_RegisterBatteryEventCallback(gAppContext->ivhandshankHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT void scHandShank_SetConnectEventCallback(HANDSHANK_CONNECT_EVENT_CALLBACK callback) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_RegisterConnectEventCallback(gAppContext->ivhandshankHelper, callback);
-        }
-    }
-}
-
-SVRP_EXPORT int scHandShank_GetBattery(int lr) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-                return HandShankClient_GetBattery(gAppContext->ivhandshankHelper, lr);
-        }
-    }
-
-    return 0;
-}
-
-SVRP_EXPORT bool scHandShank_GetConnectState(int lr) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            return HandShankClient_GetConnectState(gAppContext->ivhandshankHelper, lr);
-        }
-    }
-
-    return false;
-}
-
-SVRP_EXPORT int scHandShank_GetVersion() {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            return HandShankClient_GetVersion(gAppContext->ivhandshankHelper);
-        }
-    }
-
-    return 0;
-}
-
-SVRP_EXPORT int scHandShank_Getbond() {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            return HandShankClient_Getbond(gAppContext->ivhandshankHelper);
-        }
-    }
-
-    return 0;
-}
-
-SVRP_EXPORT void scHandShank_LedControl(int enable) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_LedControl(gAppContext->ivhandshankHelper, enable);
-        }
-    }
-}
-
-SVRP_EXPORT void scHandShank_VibrateControl(int value) {
-    if (gAppContext) {
-        if (gAppContext->ivhandshankHelper != nullptr) {
-            HandShankClient_VibrateControl(gAppContext->ivhandshankHelper, value);
-        }
-    }
-}
-// add by chenweihua 20201026 (end)

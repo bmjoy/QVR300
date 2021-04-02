@@ -26,27 +26,19 @@
 #include <chrono>
 #include <future>
 #include <mutex>
-//#define GLM_FORCE_MESSAGES
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace ShadowCreator {
+namespace UnityLauncher {
 
-#define DEBUG_TAG "willie_native_log"
+#define DEBUG_TAG "unity_launcher"
 #define WLOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, __VA_ARGS__))
 #define WLOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, DEBUG_TAG, __VA_ARGS__))
 #define WLOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, DEBUG_TAG, __VA_ARGS__))
 #define ARRAY_SIZE(x)    ((int) (sizeof(x) / sizeof((x)[0])))
     using Nanoseconds = uint64_t;
-
-    #define SENSOR_ORIENTATION_CORRECT_X 0
-    #define SENSOR_ORIENTATION_CORRECT_Y 11.5f
-    #define SENSOR_ORIENTATION_CORRECT_Z 0
-    #define SENSOR_HEAD_OFFSET_X 0.04f
-    #define SENSOR_HEAD_OFFSET_Y -0.035f
-    #define SENSOR_HEAD_OFFSET_Z 0
 }
 
 #endif //SC_COMMON_H

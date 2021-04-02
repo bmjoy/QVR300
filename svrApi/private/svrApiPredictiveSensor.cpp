@@ -31,6 +31,16 @@
 #include <math.h>
 #include <dlfcn.h>
 
+#include <sys/stat.h>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
+#include <string>
+#include <rapidxml.hpp>
+
+#include <dirent.h>
+using namespace rapidxml;
+
 using namespace Svr;
 
 
@@ -186,6 +196,9 @@ uint64_t gLastHeadTrackingFailTime = 0;
 #define QVR_BRIGHT_LIGHT_ERROR                  0x0004
 #define QVR_STEREO_CAMERA_CALIBRATION_ERROR     0x0008
 
+bool gHasLoadCalibration = false;
+glm::mat4 gCalibrationM = glm::mat4(1);
+
 
 void qIntegrate(float *_q0, float *_q1, float *_q2, float *_q3, float gx, float gy, float gz) {
 
@@ -264,9 +277,9 @@ bool _predict_motion(
 }
 
 void
-L_TrackingToReturn(svrHeadPoseState &poseState, const float *gyro_data_s, const float *gyro_data_b,
+L_TrackingToReturnExt(svrHeadPoseState &poseState, const float *gyro_data_s, const float *gyro_data_b,
                    const float *gyro_data_bdt, const float *gyro_data_bdt2,
-                   float fw_prediction_delay, const float *rotation, const float *translation) {
+                   float fw_prediction_delay, const float *rotation, const float *translation, bool virHandGesture) {
     if (gLogRawSensorData) {
         glm::fquat tempQuat;
         tempQuat.x = rotation[0];
@@ -377,47 +390,48 @@ L_TrackingToReturn(svrHeadPoseState &poseState, const float *gyro_data_s, const 
              glm::degrees(euler.z));
     }
 
-    // Adjust for the physical orientation of the sensor
-    if (gSensorOrientationCorrectX != 0.0) {
-        glm::quat adjustRotation = glm::angleAxis(glm::radians(gSensorOrientationCorrectX),
-                                                  glm::vec3(1.0f, 0.0f, 0.0f));
-        // LOGI("Adjusting sensor orientation by (%0.4f, %0.4f, %0.4f, %0.4f", adjustRotation.x, adjustRotation.y, adjustRotation.z, adjustRotation.w);
+    if (!gAppContext->useTransformMatrix && !virHandGesture) {
+        if (gSensorOrientationCorrectX != 0.0) {
+            glm::quat adjustRotation = glm::angleAxis(glm::radians(gSensorOrientationCorrectX),
+                                                      glm::vec3(1.0f, 0.0f, 0.0f));
+            // LOGI("Adjusting sensor orientation by (%0.4f, %0.4f, %0.4f, %0.4f", adjustRotation.x, adjustRotation.y, adjustRotation.z, adjustRotation.w);
 
-        glm::fquat tempQuat(poseState.pose.rotation.w, poseState.pose.rotation.x,
-                            poseState.pose.rotation.y, poseState.pose.rotation.z);
-        tempQuat *= adjustRotation;
-        poseState.pose.rotation.x = tempQuat.x;
-        poseState.pose.rotation.y = tempQuat.y;
-        poseState.pose.rotation.z = tempQuat.z;
-        poseState.pose.rotation.w = tempQuat.w;
-    }
+            glm::fquat tempQuat(poseState.pose.rotation.w, poseState.pose.rotation.x,
+                                poseState.pose.rotation.y, poseState.pose.rotation.z);
+            tempQuat *= adjustRotation;
+            poseState.pose.rotation.x = tempQuat.x;
+            poseState.pose.rotation.y = tempQuat.y;
+            poseState.pose.rotation.z = tempQuat.z;
+            poseState.pose.rotation.w = tempQuat.w;
+        }
 
-    if (gSensorOrientationCorrectY != 0.0) {
-        glm::quat adjustRotation = glm::angleAxis(glm::radians(gSensorOrientationCorrectY),
-                                                  glm::vec3(0.0f, 1.0f, 0.0f));
-        // LOGI("Adjusting sensor orientation by (%0.4f, %0.4f, %0.4f, %0.4f", adjustRotation.x, adjustRotation.y, adjustRotation.z, adjustRotation.w);
+        if (gSensorOrientationCorrectY != 0.0) {
+            glm::quat adjustRotation = glm::angleAxis(glm::radians(gSensorOrientationCorrectY),
+                                                      glm::vec3(0.0f, 1.0f, 0.0f));
+            // LOGI("Adjusting sensor orientation by (%0.4f, %0.4f, %0.4f, %0.4f", adjustRotation.x, adjustRotation.y, adjustRotation.z, adjustRotation.w);
 
-        glm::fquat tempQuat(poseState.pose.rotation.w, poseState.pose.rotation.x,
-                            poseState.pose.rotation.y, poseState.pose.rotation.z);
-        tempQuat *= adjustRotation;
-        poseState.pose.rotation.x = tempQuat.x;
-        poseState.pose.rotation.y = tempQuat.y;
-        poseState.pose.rotation.z = tempQuat.z;
-        poseState.pose.rotation.w = tempQuat.w;
-    }
+            glm::fquat tempQuat(poseState.pose.rotation.w, poseState.pose.rotation.x,
+                                poseState.pose.rotation.y, poseState.pose.rotation.z);
+            tempQuat *= adjustRotation;
+            poseState.pose.rotation.x = tempQuat.x;
+            poseState.pose.rotation.y = tempQuat.y;
+            poseState.pose.rotation.z = tempQuat.z;
+            poseState.pose.rotation.w = tempQuat.w;
+        }
 
-    if (gSensorOrientationCorrectZ != 0.0) {
-        glm::quat adjustRotation = glm::angleAxis(glm::radians(gSensorOrientationCorrectZ),
-                                                  glm::vec3(0.0f, 0.0f, 1.0f));
-        // LOGI("Adjusting sensor orientation by (%0.4f, %0.4f, %0.4f, %0.4f", adjustRotation.x, adjustRotation.y, adjustRotation.z, adjustRotation.w);
+        if (gSensorOrientationCorrectZ != 0.0) {
+            glm::quat adjustRotation = glm::angleAxis(glm::radians(gSensorOrientationCorrectZ),
+                                                      glm::vec3(0.0f, 0.0f, 1.0f));
+            // LOGI("Adjusting sensor orientation by (%0.4f, %0.4f, %0.4f, %0.4f", adjustRotation.x, adjustRotation.y, adjustRotation.z, adjustRotation.w);
 
-        glm::fquat tempQuat(poseState.pose.rotation.w, poseState.pose.rotation.x,
-                            poseState.pose.rotation.y, poseState.pose.rotation.z);
-        tempQuat *= adjustRotation;
-        poseState.pose.rotation.x = tempQuat.x;
-        poseState.pose.rotation.y = tempQuat.y;
-        poseState.pose.rotation.z = tempQuat.z;
-        poseState.pose.rotation.w = tempQuat.w;
+            glm::fquat tempQuat(poseState.pose.rotation.w, poseState.pose.rotation.x,
+                                poseState.pose.rotation.y, poseState.pose.rotation.z);
+            tempQuat *= adjustRotation;
+            poseState.pose.rotation.x = tempQuat.x;
+            poseState.pose.rotation.y = tempQuat.y;
+            poseState.pose.rotation.z = tempQuat.z;
+            poseState.pose.rotation.w = tempQuat.w;
+        }
     }
 
     if (gLogRawSensorData &&
@@ -564,7 +578,8 @@ L_TrackingToReturn(svrHeadPoseState &poseState, const float *gyro_data_s, const 
 
     // Need to adjust the position by the offset caused from device rotating around head
     // Only if in 6DOF mode.
-    if (gAppContext->currentTrackingMode & kTrackingPosition) {
+    if (!virHandGesture && !gAppContext->useTransformMatrix &&
+        (gAppContext->currentTrackingMode & kTrackingPosition)) {
         glm::fquat TempQuat = fromMat * gAppContext->modeContext->recenterRot;
         glm::vec3 baseOffset = glm::vec3(gSensorHeadOffsetX, gSensorHeadOffsetY,
                                          gSensorHeadOffsetZ);
@@ -591,6 +606,144 @@ L_TrackingToReturn(svrHeadPoseState &poseState, const float *gyro_data_s, const 
              poseState.pose.rotation.w, glm::degrees(euler.x), glm::degrees(euler.y),
              glm::degrees(euler.z));
     }
+}
+
+void
+L_TrackingToReturn(svrHeadPoseState &poseState, const float *gyro_data_s, const float *gyro_data_b,
+                   const float *gyro_data_bdt, const float *gyro_data_bdt2,
+                   float fw_prediction_delay, const float *rotation, const float *translation){
+    L_TrackingToReturnExt(poseState, gyro_data_s, gyro_data_b, gyro_data_bdt, gyro_data_bdt2,
+                          fw_prediction_delay, rotation, translation, false);
+}
+
+void
+L_TrackingToReturn_for_handshank(svrHeadPoseState &poseState, const float *gyro_data_s, const float *gyro_data_b,
+                                 const float *gyro_data_bdt, const float *gyro_data_bdt2,
+                                 float fw_prediction_delay, const float *rotation, const float *translation) {
+
+    poseState.pose.rotation.x = rotation[0];
+    poseState.pose.rotation.y = rotation[1];
+    poseState.pose.rotation.z = rotation[2];
+    poseState.pose.rotation.w = rotation[3];
+
+    //convert quat to rotation matrix
+    glm::fquat tempQuat(poseState.pose.rotation.w, poseState.pose.rotation.x,
+                        poseState.pose.rotation.y, poseState.pose.rotation.z);
+    glm::mat3 rotation_mat = mat3_cast(tempQuat);
+    rotation_mat = glm::transpose(rotation_mat); //converting from col major to row major format
+    const float *r = (const float *) glm::value_ptr(rotation_mat);
+
+    //now convert from Android Potrait to Android Landscape orientation
+
+    float input[16] = {0.f};
+    input[0] = r[0];
+    input[1] = r[1];
+    input[2] = r[2];
+    input[3] = -translation[0];
+
+    input[4] = r[3];
+    input[5] = r[4];
+    input[6] = r[5];
+    input[7] = -translation[1];
+
+    input[8] = r[6];
+    input[9] = r[7];
+    input[10] = r[8];
+    input[11] = -translation[2];
+
+    input[12] = 0.f;
+    input[13] = 0.f;
+    input[14] = 0.f;
+    input[15] = 1.f;
+
+    float LandRotLeft[16] = {0.0f, 1.0f, 0.0f, 0.0f,
+                             -1.0f, 0.0f, 0.0f, 0.0f,
+                             0.0f, 0.0f, 1.0f, 0.0f,
+                             0.0f, 0.0f, 0.0f, 1.0f};
+
+    float LandRotLeftInv[16] = {0.0f, -1.0f, 0.0f, 0.0f,
+                                1.0f, 0.0f, 0.0f, 0.0f,
+                                0.0f, 0.0f, 1.0f, 0.0f,
+                                0.0f, 0.0f, 0.0f, 1.0f};
+
+    // Z 90 degrees
+    float LandRotRight[16] = {0.0f, -1.0f, 0.0f, 0.0f,
+                              1.0f, 0.0f, 0.0f, 0.0f,
+                              0.0f, 0.0f, 1.0f, 0.0f,
+                              0.0f, 0.0f, 0.0f, 1.0f};
+
+    float LandRotRightInv[16] = {0.0f, 1.0f, 0.0f, 0.0f,
+                                 -1.0f, 0.0f, 0.0f, 0.0f,
+                                 0.0f, 0.0f, 1.0f, 0.0f,
+                                 0.0f, 0.0f, 0.0f, 1.0f};
+
+    glm::mat4 input_glm = glm::make_mat4(input);
+    glm::mat4 m = input_glm;
+
+    if (gAppContext->deviceInfo.displayOrientation == 90) {
+        // Landscape Left
+        //LOGE("Correcting for Landscape Left!");
+        glm::mat4 LandRotLeft_glm = glm::make_mat4(LandRotLeft);
+        glm::mat4 LandRotLeftInv_glm = glm::make_mat4(LandRotLeftInv);
+        m = LandRotLeft_glm * input_glm * LandRotLeftInv_glm;
+    } else if (gAppContext->deviceInfo.displayOrientation == 270) {
+        // Landscape Right
+        //LOGE("Correcting for Landscape Right!");
+        glm::mat4 LandRotRight_glm = glm::make_mat4(LandRotRight);
+        glm::mat4 LandRotRightInv_glm = glm::make_mat4(LandRotRightInv);
+        m = LandRotRight_glm * input_glm * LandRotRightInv_glm;
+
+
+        // If we are running on Android-M (23) then the sensor rotation correction is different.
+        // Android-N (24) is the new rotation.
+        if (gAppContext->deviceInfo.deviceOSVersion < 24) {
+            // For "M":
+            // Need an extra 180 degrees around X
+            glm::mat4 t = glm::rotate(glm::mat4(1.0f), (float) M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+            m = m * t;
+        } else {
+            // For "N":
+            // X: Rotated 180 around Final Y
+            // Y: Rotated 180 around final Z (Look Blue, right is red, green down, purple up)
+            // Z: Correct starting rotation of looking down -Z
+            glm::mat4 t = glm::rotate(glm::mat4(1.0f), (float) M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+            m = m * t;
+        }
+    } else if (gAppContext->deviceInfo.displayOrientation == 0) {
+        // Landscape left: sensor input Landscape
+        //LOGE("Correcting for Landscape : orientation 0 degree!");
+        glm::mat4 LandRotLeft_glm = glm::make_mat4(LandRotLeft);
+        glm::mat4 LandRotLeftInv_glm = glm::make_mat4(LandRotLeftInv);
+        m = LandRotLeft_glm * input_glm * LandRotLeftInv_glm;
+    } else if (gAppContext->deviceInfo.displayOrientation == 180) {
+        // Landscape right: sensor input Landscape
+        //LOGE("Correcting for Landscape : orientation 180 degree!");
+        glm::mat4 LandRotRight_glm = glm::make_mat4(LandRotRight);
+        glm::mat4 LandRotRightInv_glm = glm::make_mat4(LandRotRightInv);
+        m = LandRotRight_glm * input_glm * LandRotRightInv_glm;
+
+        // Need an extra 180 degrees around Z
+        glm::mat4 t = glm::rotate(glm::mat4(1.0f), ((float) M_PI), glm::vec3(0.0f, 0.0f, 1.0f));
+        m = m * t;
+    }
+
+    const float *p = (const float *) glm::value_ptr(m);
+
+    poseState.pose.position.x = p[3];
+    poseState.pose.position.y = p[7];
+    poseState.pose.position.z = p[11];
+
+    glm::fquat fromMat = glm::quat_cast(m);
+    glm::fquat newQ =
+            glm::rotate(glm::quat(1, 0, 0, 0), glm::radians(gHeadRotateX), glm::vec3(1, 0, 0)) *
+            fromMat;
+    poseState.pose.rotation.x = newQ.x;
+    poseState.pose.rotation.y = newQ.y;
+    poseState.pose.rotation.z = newQ.z;
+    poseState.pose.rotation.w = newQ.w;
+
+    poseState.headRotateLeftY = gHeadRotateLeftY;
+    poseState.headRotateRightY = gHeadRotateRightY;
 }
 
 void L_CheckPoseQuality(svrHeadPoseState &poseState, qvrservice_head_tracking_data_t *t,
@@ -623,7 +776,7 @@ void L_CheckPoseQuality(svrHeadPoseState &poseState, qvrservice_head_tracking_da
         LOGE("Unable to check pose quality: Head tracking data is NULL!");
         return;
     }
-    
+
     // First check the "pose_quality"...
     if ((gAppContext->currentTrackingMode & kTrackingPosition) &&
         t->pose_quality < gMinPoseQuality) {
@@ -633,9 +786,6 @@ void L_CheckPoseQuality(svrHeadPoseState &poseState, qvrservice_head_tracking_da
         }
 
         poseState.poseStatus &= ~kTrackingPosition;
-        gAppContext->mTrackingDataLost = true;
-    } else {
-        gAppContext->mTrackingDataLost = false;
     }
 
     // ... then check any of the state flags for 6DOF.
@@ -738,7 +888,12 @@ void L_CheckPoseQuality(svrHeadPoseState &poseState, qvrservice_head_tracking_da
 
 //--------------------------------------------------------------------------------------------------------
 SvrResult GetTrackingFromPredictiveSensor(float fw_prediction_delay, uint64_t *pSampleTimeStamp,
-                                          svrHeadPoseState &poseState)
+                                          svrHeadPoseState &poseState){
+    return GetTrackingFromPredictiveSensorExt(fw_prediction_delay, pSampleTimeStamp, poseState, false);
+}
+
+SvrResult GetTrackingFromPredictiveSensorExt(float fw_prediction_delay, uint64_t *pSampleTimeStamp,
+                                          svrHeadPoseState &poseState, bool virHandGesture)
 //--------------------------------------------------------------------------------------------------------
 {
     if (gAppContext == NULL || ((!gAppContext->mUseIvSlam) && (NULL == gAppContext->qvrHelper))) {
@@ -855,6 +1010,10 @@ SvrResult GetTrackingFromPredictiveSensor(float fw_prediction_delay, uint64_t *p
         return SVR_ERROR_UNKNOWN;
     }
 
+    memcpy(poseState.pose.rawQuaternion, t->rotation, sizeof(float) * 4);
+    memcpy(poseState.pose.rawPosition, t->translation, sizeof(float) * 3);
+    poseState.pose.rawTS = t->ts;
+
     *pSampleTimeStamp = t->ts;
 
     // Save the time stamp from what actually comes back.
@@ -862,13 +1021,13 @@ SvrResult GetTrackingFromPredictiveSensor(float fw_prediction_delay, uint64_t *p
 
     const float *rotation = t->rotation;
     const float *translation = t->translation;
-    if(gAppContext->mUseIvSlam){
-        L_TrackingToReturn(poseState, NULL, NULL, NULL, NULL, 0.0f, rotation,
-                           translation); // Note NULL and 0.0f since not doing any prediction on historic data :)
+    if (gAppContext->mUseIvSlam) {
+        L_TrackingToReturnExt(poseState, NULL, NULL, NULL, NULL, 0.0f, rotation,
+                           translation,virHandGesture); // Note NULL and 0.0f since not doing any prediction on historic data :)
     } else{
-        L_TrackingToReturn(poseState, t->prediction_coff_s, t->prediction_coff_b,
+        L_TrackingToReturnExt(poseState, t->prediction_coff_s, t->prediction_coff_b,
                            t->prediction_coff_bdt, t->prediction_coff_bdt2, fw_prediction_delay,
-                           rotation, translation);
+                           rotation, translation,virHandGesture);
     }
 
 
@@ -1045,8 +1204,33 @@ SvrResult GetTrackingFromPredictiveSensor(float fw_prediction_delay, uint64_t *p
     return SVR_ERROR_NONE;
 }
 
+glm::mat3 rodrigues(glm::vec3 &rotation) {
+    auto axis = glm::normalize(rotation);
+    float theta = glm::length(rotation);
+    float cosTheta = cos(theta);
+    float sinTheta = sin(theta);
+    glm::mat3 axisMat{0, axis.z, -axis.y, -axis.z, 0, axis.x, axis.y, -axis.x, 0};
+    glm::mat3 outerMat = glm::outerProduct(axis, axis);
+    return glm::mat3(1) * cosTheta + (1 - cosTheta) * outerMat + sinTheta * axisMat;
+}
+
+void printGlmMat4(const char *matName, glm::mat4 &mat4) {
+    LOGI("%s = [%f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f; %f, %f, %f, %f]", matName,
+         mat4[0][0], mat4[1][0], mat4[2][0], mat4[3][0],
+         mat4[0][1], mat4[1][1], mat4[2][1], mat4[3][1],
+         mat4[0][2], mat4[1][2], mat4[2][2], mat4[3][2],
+         mat4[0][3], mat4[1][3], mat4[2][3], mat4[3][3]);
+}
+
+void printGlmMat3(const char *matName, glm::mat3 &mat3) {
+    LOGI("%s = [%f, %f, %f; %f, %f, %f; %f, %f, %f]", matName,
+         mat3[0][0], mat3[1][0], mat3[2][0],
+         mat3[0][1], mat3[1][1], mat3[2][1],
+         mat3[0][2], mat3[1][2], mat3[2][2]);
+}
+
 //--------------------------------------------------------------------------------------------------------
-SvrResult GetTrackingFromHistoricSensor(uint64_t timestampNs, svrHeadPoseState &poseState)
+SvrResult GetTrackingFromHistoricSensor(uint64_t timestampNs, svrHeadPoseState &poseState, bool bLoadCalibration)
 //--------------------------------------------------------------------------------------------------------
 {
     if (gAppContext == NULL) {
@@ -1107,6 +1291,83 @@ SvrResult GetTrackingFromHistoricSensor(uint64_t timestampNs, svrHeadPoseState &
 
     // Save the time stamp from what actually comes back.
     poseState.poseTimeStampNs = t->ts;
+
+    if (bLoadCalibration) {
+        if (!gHasLoadCalibration) {
+            LOGI("GetTrackingFromHistoricSensor start load calibration");
+            std::string persistPath = "/persist/qvr/";
+            std::string calibrationPath;
+            std::string xmlSuffix = ".xml";
+            DIR *persistDir;
+            struct dirent *ent;
+            if ((persistDir = opendir (persistPath.c_str())) != NULL) {
+                while ((ent = readdir (persistDir)) != NULL) {
+                    std::string currFilePath{ent->d_name};
+                    if (currFilePath.size() <= xmlSuffix.size()) {
+                        continue;
+                    } else if (std::equal(xmlSuffix.rbegin(), xmlSuffix.rend(),
+                                          currFilePath.rbegin())) {
+                        calibrationPath = persistPath + currFilePath;
+                        break;
+                    }
+                }
+                closedir (persistDir);
+            } else {
+                LOGE("Failed open folder %s", persistPath.c_str());
+            }
+            struct stat fileBuffer;
+            if (0 == stat(calibrationPath.c_str(), &fileBuffer)) {
+                LOGI("GetTrackingFromHistoricSensor file exist start parse");
+                std::ifstream ifs(calibrationPath);
+                std::string content((std::istreambuf_iterator<char>(ifs)),
+                                    (std::istreambuf_iterator<char>()));
+                std::vector<char> dataVector(content.begin(), content.end());
+                xml_document<> doc;
+                doc.parse<0>(&dataVector[0]);
+                xml_node<>* node = doc.first_node("DeviceConfiguration")->first_node("SFConfig")->first_node("Stateinit");
+                std::string strOMBC = node->first_attribute("ombc")->value();
+                std::string strTBC = node->first_attribute("tbc")->value();
+                LOGI("GetTrackingFromHistoricSensor strOMBC=%s, strTBC=%s", strOMBC.c_str(), strTBC.c_str());
+                std::stringstream ssOMBC{strOMBC};
+                std::vector<float> ombcVector{ std::istream_iterator<float>(ssOMBC) , std::istream_iterator<float>() };
+                glm::vec3 ombc{ombcVector[0], ombcVector[1], ombcVector[2]};
+                glm::mat3 ombcMat = rodrigues(ombc);
+                printGlmMat3("GetTrackingFromHistoricSensor ombcMat", ombcMat);
+                std::stringstream ssTBC{strTBC};
+                std::vector<float> tbcVector{ std::istream_iterator<float>(ssTBC) , std::istream_iterator<float>() };
+                glm::vec3 tbc{tbcVector[0], tbcVector[1], tbcVector[2]};
+                glm::mat4 transformM = glm::mat4(ombcMat);
+                transformM[3] = glm::vec4{tbc, 1.0f};
+                printGlmMat4("GetTrackingFromHistoricSensor transformM", transformM);
+                glm::mat4 negativeM = glm::mat4(1);
+                negativeM[0][0] = 0;
+                negativeM[1][1] = 0;
+                negativeM[0][1] = -1;
+                negativeM[1][0] = -1;
+                negativeM[2][2] = -1;
+                gCalibrationM = transformM * negativeM;
+                printGlmMat4("GetTrackingFromHistoricSensor done gCalibrationM", gCalibrationM);
+                ifs.close();
+            } else {
+                LOGI("GetTrackingFromHistoricSensor Failed loading %s", calibrationPath.c_str());
+            }
+            gHasLoadCalibration = true;
+        }
+        glm::quat oriQ{t->rotation[3], t->rotation[0], t->rotation[1], t->rotation[2]};
+        glm::vec3 oriT{t->translation[0], t->translation[1], t->translation[2]};
+        glm::mat4 oriM = glm::mat4_cast(oriQ);
+        oriM[3] = glm::vec4{oriT, 1.0f};
+        glm::mat4 newM = oriM * gCalibrationM;
+        glm::quat newQ = glm::quat_cast(newM);
+        glm::vec4 newT = newM[3];
+        t->rotation[0] = newQ.x;
+        t->rotation[1] = newQ.y;
+        t->rotation[2] = newQ.z;
+        t->rotation[3] = newQ.w;
+        t->translation[0] = newT.x;
+        t->translation[1] = newT.y;
+        t->translation[2] = newT.z;
+    }
 
     const float *rotation = t->rotation;
     const float *translation = t->translation;
