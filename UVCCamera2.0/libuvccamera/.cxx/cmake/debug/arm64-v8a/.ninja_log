@@ -1,0 +1,20 @@
+# ninja log v5
+323	1658	637846095	CMakeFiles/uvc_native.dir/hid.c.o	3c606865ba3221cd
+944	2374	637846096	CMakeFiles/uvc_native.dir/util/GLUtils.cpp.o	18de48b8acbe802d
+1136	2665	637846096	CMakeFiles/uvc_native.dir/render/EGLRender.cpp.o	eb518e99072ffa9
+2	2914	637846097	CMakeFiles/uvc_native.dir/uvc_native.cpp.o	6d454ef5b3813815
+827	3092	637846097	CMakeFiles/uvc_native.dir/sample/CubeSample.cpp.o	f6a47217d4b94c66
+720	3738	637846098	CMakeFiles/uvc_native.dir/render/MyGLRenderContext.cpp.o	f982e0f195e6c7d0
+1427	4648	637846098	CMakeFiles/uvc_native.dir/sample/Model3DSample.cpp.o	d32234f9d5622995
+323	1979	637846152	CMakeFiles/uvc_native.dir/sample/CubeSample.cpp.o	f6a47217d4b94c66
+7	1998	637846152	CMakeFiles/uvc_native.dir/uvc_native.cpp.o	6d454ef5b3813815
+432	2934	637846153	CMakeFiles/uvc_native.dir/sample/Model3DSample.cpp.o	d32234f9d5622995
+2934	3793	637846154	E:/AS_Workspace/UVCCamera2.0/libuvccamera/build/intermediates/cmake/debug/obj/arm64-v8a/libuvc_native.so	97f2e63513bfa570
+7	1218	637861803	CMakeFiles/uvc_native.dir/uvc_native.cpp.o	6d454ef5b3813815
+1218	2196	637861804	E:/AS_Workspace/UVCCamera2.0/libuvccamera/build/intermediates/cmake/debug/obj/arm64-v8a/libuvc_native.so	97f2e63513bfa570
+6	1324	637862916	CMakeFiles/uvc_native.dir/uvc_native.cpp.o	6d454ef5b3813815
+1325	1557	637862916	E:/AS_Workspace/UVCCamera2.0/libuvccamera/build/intermediates/cmake/debug/obj/arm64-v8a/libuvc_native.so	97f2e63513bfa570
+6	1193	637863476	CMakeFiles/uvc_native.dir/uvc_native.cpp.o	6d454ef5b3813815
+1193	1460	637863476	E:/AS_Workspace/UVCCamera2.0/libuvccamera/build/intermediates/cmake/debug/obj/arm64-v8a/libuvc_native.so	97f2e63513bfa570
+6	1260	637921007	CMakeFiles/uvc_native.dir/uvc_native.cpp.o	6d454ef5b3813815
+1261	1522	637921007	E:/AS_Workspace/UVCCamera2.0/libuvccamera/build/intermediates/cmake/debug/obj/arm64-v8a/libuvc_native.so	97f2e63513bfa570

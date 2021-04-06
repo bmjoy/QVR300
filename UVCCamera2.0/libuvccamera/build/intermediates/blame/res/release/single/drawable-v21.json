@@ -1,0 +1,30 @@
+[
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\res\\merged\\release\\drawable-v21\\ic_arrow_down_24dp.xml",
+        "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\7ed6f44a64939d5e7b2c0c4d76377912\\preference-v7-27.1.1\\res\\drawable-v21\\ic_arrow_down_24dp.xml"
+    },
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\res\\merged\\release\\drawable-v21\\star.xml",
+        "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\763c19a48cd7c8f8c5f9277fda5f8f09\\common-2.12.4\\res\\drawable-v21\\star.xml"
+    },
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\res\\merged\\release\\drawable-v21\\notification_action_background.xml",
+        "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\9179985fd83413094617721c23ee5124\\support-compat-27.1.1\\res\\drawable-v21\\notification_action_background.xml"
+    },
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\res\\merged\\release\\drawable-v21\\preference_list_divider_material.xml",
+        "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\7ed6f44a64939d5e7b2c0c4d76377912\\preference-v7-27.1.1\\res\\drawable-v21\\preference_list_divider_material.xml"
+    },
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\res\\merged\\release\\drawable-v21\\abc_action_bar_item_background_material.xml",
+        "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\353c0e409c6c7528f4f48f1e8d24d572\\appcompat-v7-27.1.1\\res\\drawable-v21\\abc_action_bar_item_background_material.xml"
+    },
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\res\\merged\\release\\drawable-v21\\abc_btn_colored_material.xml",
+        "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\353c0e409c6c7528f4f48f1e8d24d572\\appcompat-v7-27.1.1\\res\\drawable-v21\\abc_btn_colored_material.xml"
+    },
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\res\\merged\\release\\drawable-v21\\abc_edit_text_material.xml",
+        "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\353c0e409c6c7528f4f48f1e8d24d572\\appcompat-v7-27.1.1\\res\\drawable-v21\\abc_edit_text_material.xml"
+    }
+]

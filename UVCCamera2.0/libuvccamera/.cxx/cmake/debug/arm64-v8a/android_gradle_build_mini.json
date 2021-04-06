@@ -1,0 +1,19 @@
+{
+  "buildFiles": [
+    "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\build\\cmake\\android.toolchain.cmake",
+    "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\build\\cmake\\platforms.cmake",
+    "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\debug\\arm64-v8a\" clean"
+  ],
+  "buildTargetsCommand": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe  -C \"E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\debug\\arm64-v8a\" {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "uvc_native-Debug-arm64-v8a": {
+      "artifactName": "uvc_native",
+      "buildCommand": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\debug\\arm64-v8a\" uvc_native",
+      "abi": "arm64-v8a",
+      "output": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\cmake\\debug\\obj\\arm64-v8a\\libuvc_native.so"
+    }
+  }
+}

@@ -1,0 +1,82 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3  ~  UVCCamera
+4  ~  library and sample to access to UVC web camera on non-rooted Android device
+5  ~
+6  ~ Copyright (c) 2014-2017 saki t_saki@serenegiant.com
+7  ~
+8  ~  Licensed under the Apache License, Version 2.0 (the "License");
+9  ~  you may not use this file except in compliance with the License.
+10  ~   You may obtain a copy of the License at
+11  ~
+12  ~      http://www.apache.org/licenses/LICENSE-2.0
+13  ~
+14  ~   Unless required by applicable law or agreed to in writing, software
+15  ~   distributed under the License is distributed on an "AS IS" BASIS,
+16  ~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+17  ~   See the License for the specific language governing permissions and
+18  ~   limitations under the License.
+19  ~
+20  ~  All files in the folder are under this Apache License, Version 2.0.
+21  ~  Files in the libjpeg-turbo, libusb, libuvc, rapidjson folder
+22  ~  may have a different license, see the respective files.
+23-->
+24<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+25    package="com.vr.display"
+26    android:versionCode="8"
+27    android:versionName="3.00" >
+28
+29    <uses-sdk
+30        android:minSdkVersion="21"
+30-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+31        android:targetSdkVersion="27" />
+31-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+32
+33    <!-- <uses-permission android:name="android.permission.INTERNET"/> -->
+34
+35    <uses-permission android:name="android.permission.CAMERA" />
+35-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:29:5-64
+35-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:29:22-62
+36    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+36-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:30:5-80
+36-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:30:22-78
+37    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+37-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:31:5-79
+37-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:31:22-77
+38    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+38-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:32:5-77
+38-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:32:22-75
+39
+40    <application
+40-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:33:5-47:19
+41        android:allowBackup="true"
+41-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:34:9-35
+42        android:debuggable="true"
+43        android:icon="@drawable/ic_launcher"
+43-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:35:9-45
+44        android:label="@string/app_name"
+44-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:36:9-41
+45        android:theme="@style/AppTheme2" >
+45-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:37:9-41
+46        <activity
+46-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:38:9-46:20
+47            android:name="com.serenegiant.display.MainActivity"
+47-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:39:13-64
+48            android:label="@string/app_name"
+48-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:40:13-45
+49            android:theme="@style/Theme.AppCompat.NoActionBar" >
+49-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:41:13-63
+50            <intent-filter>
+50-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:42:13-45:29
+51                <action android:name="android.intent.action.MAIN" />
+51-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:43:17-69
+51-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:43:25-66
+52
+53                <category android:name="android.intent.category.LAUNCHER" />
+53-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:44:17-77
+53-->E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:44:27-74
+54            </intent-filter>
+55        </activity>
+56    </application>
+57
+58</manifest>

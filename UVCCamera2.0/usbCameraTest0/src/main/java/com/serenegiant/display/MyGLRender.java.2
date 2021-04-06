@@ -1,0 +1,50 @@
+package com.serenegiant.display;
+
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
+
+import com.serenegiant.helper.Native;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+
+public class MyGLRender implements GLSurfaceView.Renderer {
+    private int mSampleType;
+
+    MyGLRender() {
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        Native.renderOnSurfaceCreated();
+//        GLES20.glViewport(0,0,1920,1080);
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
+        Native.renderOnSurfaceChanged(width, height);
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl) {
+        GLES20.glClearColor(0,0,0,0);
+       Native.renderOnDrawFrame();
+    }
+
+    public void init() {
+        Native.renderInit();
+    }
+
+    public void unInit() {
+        Native.renderUnInit();
+    }
+
+
+    public void updateTransformMatrix(float rotateX, float rotateY, float scaleX, float scaleY)
+    {
+        Native.renderUpdateTransformMatrix(rotateX, rotateY, scaleX, scaleY);
+    }
+
+}

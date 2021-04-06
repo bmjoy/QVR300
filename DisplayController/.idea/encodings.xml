@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/bluetoothring/src/main/java/com/invision/bluetoothring/AcceptThread.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/bluetoothring/src/main/java/com/invision/bluetoothring/CRCVerify.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/bluetoothring/src/main/java/com/invision/bluetoothring/Helper.java" charset="GBK" />
+  </component>
+</project>

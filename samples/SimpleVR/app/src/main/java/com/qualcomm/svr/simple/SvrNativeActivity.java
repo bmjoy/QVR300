@@ -19,7 +19,7 @@ import android.view.View;
 import android.os.Bundle;
 import 	android.content.res.AssetManager;
 import android.view.WindowManager;
-//import com.serenegiant.helper.USBHelper;
+import com.serenegiant.helper.USBHelper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class SvrNativeActivity extends android.app.NativeActivity
 	public static final  String ASSETS_SUB_FOLDER_NAME = "raw";
 	public static final int BUFFER_SIZE = 1024;
 
-//	private USBHelper usbHelper;
+	private USBHelper usbHelper;
 	private BroadcastReceiver updateAnchorReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -83,8 +83,8 @@ public class SvrNativeActivity extends android.app.NativeActivity
 			editor.commit();
 			copyAssetsToExternal();
 		}
-//		usbHelper = new USBHelper();
-//		usbHelper.init(this);
+		usbHelper = new USBHelper();
+		usbHelper.init(this);
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("boardcast_for_update_anchor");
 		registerReceiver(updateAnchorReceiver, filter);
@@ -138,9 +138,9 @@ public class SvrNativeActivity extends android.app.NativeActivity
 	@Override
 	protected void onDestroy() {
 
-//		if (usbHelper != null){
-//			usbHelper.destroy();
-//		}
+		if (usbHelper != null){
+			usbHelper.destroy();
+		}
 
 		super.onDestroy();
 

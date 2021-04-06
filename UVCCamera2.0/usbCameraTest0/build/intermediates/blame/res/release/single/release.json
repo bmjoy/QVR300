@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\build\\intermediates\\res\\merged\\release\\layout_activity_main.xml.flat",
+        "source": "E:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\src\\main\\res\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\build\\intermediates\\res\\merged\\release\\drawable-hdpi_ic_launcher.png.flat",
+        "source": "E:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\src\\main\\res\\drawable-hdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "E:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\build\\intermediates\\res\\merged\\release\\xml_device_filter.xml.flat",
+        "source": "E:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\src\\main\\res\\xml\\device_filter.xml"
+    }
+]

@@ -1,0 +1,28 @@
+{
+    "logs": [
+        {
+            "outputFile": "E:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\build\\intermediates\\incremental\\mergeReleaseResources\\merged.dir\\values-v11\\values-v11.xml",
+            "map": [
+                {
+                    "source": "E:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\src\\main\\res\\values-v11\\styles.xml",
+                    "from": {
+                        "startLines": "29",
+                        "startColumns": "4",
+                        "startOffsets": "1134",
+                        "endLines": "31",
+                        "endColumns": "12",
+                        "endOffsets": "1266"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "4",
+                        "endColumns": "12",
+                        "endOffsets": "187"
+                    }
+                }
+            ]
+        }
+    ]
+}

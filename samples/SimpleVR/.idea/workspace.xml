@@ -2,54 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cada1b1d-7bcc-457f-8764-4558150c83c3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../3rdparty/qvr/inc/QVRCameraClient.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../3rdparty/qvr/inc/QVRCameraClient.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../framework/svrAndroidMain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../framework/svrAndroidMain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../framework/svrConfig.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../framework/svrConfig.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../framework/svrRenderTarget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../framework/svrRenderTarget.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../framework/svrUtil.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../framework/svrUtil.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/Common.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/CpuTimer.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/CpuTimer.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/InVisionMutex.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/InVisionMutex.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/InVisionSignal.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/InVisionSignal.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/InVisionThread.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/InVisionThread.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/LayerFetcher.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/LayerFetcher.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/invisionsfclient.h" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../DisplayController/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../invision/slam/InvisionSlamClient.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../invision/slam/InvisionSlamClient.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../invision/stb_image_write.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle___libuvccamera_debug__aar.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle___svrApi_v8a_debug__aar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle___svrApi_v8a_debug__aar.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/aar/libuvccamera-debug.aar" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/qualcomm/svr/simple/SvrNativeActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/qualcomm/svr/simple/SvrNativeActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jni/ARCORE_API.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jni/Android.mk" beforeDir="false" afterPath="$PROJECT_DIR$/jni/Android.mk" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jni/app.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/jni/app.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/jni/Android.mk" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/jni/Android.mk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/private/svrApiCore.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/private/svrApiCore.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/private/svrApiCore.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/private/svrApiCore.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/private/svrApiPredictiveSensor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/private/svrApiPredictiveSensor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/private/svrApiPredictiveSensor.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/private/svrApiPredictiveSensor.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/private/svrApiTimeWarp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/private/svrApiTimeWarp.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/private/svrApiTimeWarp.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/private/svrApiTimeWarp.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/private/svrApiTimeWarpShaders.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/private/svrApiTimeWarpShaders.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/private/svrApiVersion.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/private/svrApiVersion.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrApi/public/svrApi.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrApi/public/svrApi.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../svrUnity/UnityPlugin/nativeSource/svrUnity.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../svrUnity/UnityPlugin/nativeSource/svrUnity.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[192.168.0.100:5555]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -99,7 +64,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="android.sdk.path" value="$PROJECT_DIR$/../../../../../Android/SDK" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../DisplayController" />
     <property name="project.structure.last.edited" value="Suggestions" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -230,11 +195,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="92" y="92" width="1736" height="856" maximized="true" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1616665353451" />
-    <state x="686" y="211" key="FileChooserDialogImpl" timestamp="1617361983380">
+    <state x="686" y="211" key="FileChooserDialogImpl" timestamp="1617700401806">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1616157494708" />
-    <state x="686" y="211" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1617361983380" />
+    <state x="686" y="211" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1617700401806" />
     <state width="1308" height="281" key="GridCell.Tab.0.bottom" timestamp="1617363250073">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

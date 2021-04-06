@@ -1,0 +1,76 @@
+{
+  "stringTable": {
+    "0": "E:/AS_Workspace/UVCCamera2.0/libuvccamera/.cxx/cmake/debug/arm64-v8a",
+    "1": "--target=aarch64-none-linux-android21 --gcc-toolchain=C:/Users/guowei/AppData/Local/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Users/guowei/AppData/Local/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Duvc_native_EXPORTS -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/render -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/sample -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/glm -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/inc -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/inc/assimp -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/model -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/opencv_3_0_0 -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/arcore -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libjpeg/libjpeg-turbo-1.5.0/include -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libjpeg/libjpeg-turbo-1.5.0 -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libusb/libusb -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libusb/liusb/libusb -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libuvc/libuvc/include -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libuvc/libuvc/include/libuvc -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security -O0 -fno-limit-debug-info -fPIC",
+    "2": "--target=aarch64-none-linux-android21 --gcc-toolchain=C:/Users/guowei/AppData/Local/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Users/guowei/AppData/Local/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Duvc_native_EXPORTS -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/render -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/sample -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/glm -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/inc -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/inc/assimp -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/model -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/opencv_3_0_0 -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/arcore -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libjpeg/libjpeg-turbo-1.5.0/include -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libjpeg/libjpeg-turbo-1.5.0 -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libusb/libusb -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libusb/liusb/libusb -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libuvc/libuvc/include -IE:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libuvc/libuvc/include/libuvc -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -fno-addrsig -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11 -frtti -fexceptions -O0 -fno-limit-debug-info -fPIC"
+  },
+  "buildFiles": [
+    "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\build\\cmake\\android.toolchain.cmake",
+    "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\build\\cmake\\platforms.cmake",
+    "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\debug\\arm64-v8a\" clean"
+  ],
+  "buildTargetsCommand": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe  -C \"E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\debug\\arm64-v8a\" {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "uvc_native-Debug-arm64-v8a": {
+      "buildCommand": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\debug\\arm64-v8a\" uvc_native",
+      "buildType": "debug",
+      "toolchain": "2440171680",
+      "abi": "arm64-v8a",
+      "artifactName": "uvc_native",
+      "files": [
+        {
+          "src": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\hid.c",
+          "flagsOrdinal": 1,
+          "workingDirectoryOrdinal": 0
+        },
+        {
+          "src": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\uvc_native.cpp",
+          "flagsOrdinal": 2,
+          "workingDirectoryOrdinal": 0
+        },
+        {
+          "src": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\render\\EGLRender.cpp",
+          "flagsOrdinal": 2,
+          "workingDirectoryOrdinal": 0
+        },
+        {
+          "src": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\render\\MyGLRenderContext.cpp",
+          "flagsOrdinal": 2,
+          "workingDirectoryOrdinal": 0
+        },
+        {
+          "src": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\util\\GLUtils.cpp",
+          "flagsOrdinal": 2,
+          "workingDirectoryOrdinal": 0
+        },
+        {
+          "src": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\sample\\CubeSample.cpp",
+          "flagsOrdinal": 2,
+          "workingDirectoryOrdinal": 0
+        },
+        {
+          "src": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\sample\\Model3DSample.cpp",
+          "flagsOrdinal": 2,
+          "workingDirectoryOrdinal": 0
+        }
+      ],
+      "headers": [],
+      "output": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\cmake\\debug\\obj\\arm64-v8a\\libuvc_native.so"
+    }
+  },
+  "toolchains": {
+    "2440171680": {
+      "cCompilerExecutable": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
+      "cppCompilerExecutable": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+    }
+  },
+  "cFileExtensions": [
+    "c"
+  ],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

@@ -1,0 +1,132 @@
+-- Merging decision tree log ---
+manifest
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+MERGED from [:libuvccamera] E:\AS_Workspace\UVCCamera2.0\libuvccamera\build\intermediates\library_manifest\debug\AndroidManifest.xml:24:1-33:12
+MERGED from [com.android.support:support-v4:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\b5728334cfbc62e33d01176c41c85c28\support-v4-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-media-compat:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\eec9c6742b0ddd22d966b33dfa565f7e\support-media-compat-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.serenegiant:common:2.12.4] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\763c19a48cd7c8f8c5f9277fda5f8f09\common-2.12.4\AndroidManifest.xml:2:1-11:12
+MERGED from [com.android.support:preference-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\7ed6f44a64939d5e7b2c0c4d76377912\preference-v7-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:appcompat-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\353c0e409c6c7528f4f48f1e8d24d572\appcompat-v7-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-fragment:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\5e187c4006147468dcbb22c1124e44d7\support-fragment-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:recyclerview-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\3a8b895605f975ca35d9b2174f5b5d22\recyclerview-v7-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:animated-vector-drawable:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\5bf94542816cede05f2b7abf811cca3d\animated-vector-drawable-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-core-ui:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\7442fd6ee16aefe30ae949343ad0d649\support-core-ui-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-core-utils:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\0451fe442e93e268591e1ac458283df7\support-core-utils-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-vector-drawable:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\e8aeeaf7d5de25bb37bda8db7f5816cc\support-vector-drawable-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-compat:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\9179985fd83413094617721c23ee5124\support-compat-27.1.1\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:runtime:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\8b9f992b9a764b8dd55ba6a54b08f19a\runtime-1.1.0\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:livedata-core:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\f550a28d93c7bc97d64bf3e2b2f7f7c3\livedata-core-1.1.0\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\a8fc390d5db75263d6c32394035785ef\viewmodel-1.1.0\AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.core:runtime:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\bfaa367b3e5f3fd5287c547aee1543ac\runtime-1.1.0\AndroidManifest.xml:17:1-22:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+	package
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:25:5-38
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+	android:versionCode
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:1-49:12
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:24:11-69
+uses-permission#android.permission.CAMERA
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:29:5-64
+	android:name
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:29:22-62
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:30:5-80
+	android:name
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:30:22-78
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:31:5-79
+	android:name
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:31:22-77
+uses-permission#android.permission.SYSTEM_ALERT_WINDOW
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:32:5-77
+	android:name
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:32:22-75
+application
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:33:5-47:19
+	android:label
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:36:9-41
+	android:icon
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:35:9-45
+	android:allowBackup
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:34:9-35
+	android:theme
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:37:9-41
+activity#com.serenegiant.display.MainActivity
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:38:9-46:20
+	android:label
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:40:13-45
+	android:theme
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:41:13-63
+	android:name
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:39:13-64
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:42:13-45:29
+action#android.intent.action.MAIN
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:43:17-69
+	android:name
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:43:25-66
+category#android.intent.category.LAUNCHER
+ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:44:17-77
+	android:name
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml:44:27-74
+uses-sdk
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+MERGED from [:libuvccamera] E:\AS_Workspace\UVCCamera2.0\libuvccamera\build\intermediates\library_manifest\debug\AndroidManifest.xml:29:5-31:41
+MERGED from [:libuvccamera] E:\AS_Workspace\UVCCamera2.0\libuvccamera\build\intermediates\library_manifest\debug\AndroidManifest.xml:29:5-31:41
+MERGED from [com.android.support:support-v4:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\b5728334cfbc62e33d01176c41c85c28\support-v4-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-v4:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\b5728334cfbc62e33d01176c41c85c28\support-v4-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-media-compat:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\eec9c6742b0ddd22d966b33dfa565f7e\support-media-compat-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-media-compat:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\eec9c6742b0ddd22d966b33dfa565f7e\support-media-compat-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.serenegiant:common:2.12.4] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\763c19a48cd7c8f8c5f9277fda5f8f09\common-2.12.4\AndroidManifest.xml:7:5-9:41
+MERGED from [com.serenegiant:common:2.12.4] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\763c19a48cd7c8f8c5f9277fda5f8f09\common-2.12.4\AndroidManifest.xml:7:5-9:41
+MERGED from [com.android.support:preference-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\7ed6f44a64939d5e7b2c0c4d76377912\preference-v7-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:preference-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\7ed6f44a64939d5e7b2c0c4d76377912\preference-v7-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:appcompat-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\353c0e409c6c7528f4f48f1e8d24d572\appcompat-v7-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:appcompat-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\353c0e409c6c7528f4f48f1e8d24d572\appcompat-v7-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-fragment:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\5e187c4006147468dcbb22c1124e44d7\support-fragment-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-fragment:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\5e187c4006147468dcbb22c1124e44d7\support-fragment-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:recyclerview-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\3a8b895605f975ca35d9b2174f5b5d22\recyclerview-v7-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:recyclerview-v7:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\3a8b895605f975ca35d9b2174f5b5d22\recyclerview-v7-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\5bf94542816cede05f2b7abf811cca3d\animated-vector-drawable-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\5bf94542816cede05f2b7abf811cca3d\animated-vector-drawable-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-ui:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\7442fd6ee16aefe30ae949343ad0d649\support-core-ui-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-ui:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\7442fd6ee16aefe30ae949343ad0d649\support-core-ui-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-utils:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\0451fe442e93e268591e1ac458283df7\support-core-utils-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-utils:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\0451fe442e93e268591e1ac458283df7\support-core-utils-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\e8aeeaf7d5de25bb37bda8db7f5816cc\support-vector-drawable-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\e8aeeaf7d5de25bb37bda8db7f5816cc\support-vector-drawable-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\9179985fd83413094617721c23ee5124\support-compat-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:27.1.1] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\9179985fd83413094617721c23ee5124\support-compat-27.1.1\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:runtime:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\8b9f992b9a764b8dd55ba6a54b08f19a\runtime-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:runtime:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\8b9f992b9a764b8dd55ba6a54b08f19a\runtime-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata-core:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\f550a28d93c7bc97d64bf3e2b2f7f7c3\livedata-core-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata-core:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\f550a28d93c7bc97d64bf3e2b2f7f7c3\livedata-core-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\a8fc390d5db75263d6c32394035785ef\viewmodel-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\a8fc390d5db75263d6c32394035785ef\viewmodel-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.core:runtime:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\bfaa367b3e5f3fd5287c547aee1543ac\runtime-1.1.0\AndroidManifest.xml:20:5-44
+MERGED from [android.arch.core:runtime:1.1.0] C:\Users\guowei\.gradle\caches\transforms-2\files-2.1\bfaa367b3e5f3fd5287c547aee1543ac\runtime-1.1.0\AndroidManifest.xml:20:5-44
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+		ADDED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\usbCameraTest0\src\main\AndroidManifest.xml

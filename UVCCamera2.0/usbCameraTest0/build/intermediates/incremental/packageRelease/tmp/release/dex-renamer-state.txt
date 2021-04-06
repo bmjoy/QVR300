@@ -1,0 +1,4 @@
+#Fri Mar 19 09:28:12 CST 2021
+base.0=E\:\\AS_Workspace\\UVCCamera2.0\\usbCameraTest0\\build\\intermediates\\dex\\release\\shrunkDex\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

@@ -1,0 +1,4 @@
+include ':controller'
+include ':displaycontroller'
+rootProject.name='OpenGL'
+include ':AndroidTest'

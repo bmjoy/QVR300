@@ -1,0 +1,197 @@
+{
+  "abi": "ARM64_V8A",
+  "abiPlatformVersion": 21,
+  "buildSettings": {
+    "environmentVariables": []
+  },
+  "cmake": {
+    "cmakeArtifactsBaseFolder": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\release\\arm64-v8a",
+    "cmakeServerLogFile": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\release\\arm64-v8a\\cmake_server_log.txt",
+    "cmakeWrappingBaseFolder": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cxx\\release\\arm64-v8a",
+    "effectiveConfiguration": {
+      "name": "traditional-android-studio-cmake-environment",
+      "description": "Composite reified CMakeSettings configuration",
+      "generator": "Ninja",
+      "inheritEnvironments": [
+        "ndk"
+      ],
+      "buildRoot": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\release\\arm64-v8a",
+      "cmakeToolchain": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\build\\cmake\\android.toolchain.cmake",
+      "cmakeExecutable": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
+      "variables": [
+        {
+          "name": "CMAKE_CXX_FLAGS",
+          "value": "-std\u003dc++11 -frtti -fexceptions"
+        },
+        {
+          "name": "CMAKE_BUILD_TYPE",
+          "value": "Release"
+        },
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\build\\cmake\\android.toolchain.cmake"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "arm64-v8a"
+        },
+        {
+          "name": "ANDROID_NDK",
+          "value": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "android-21"
+        },
+        {
+          "name": "CMAKE_ANDROID_ARCH_ABI",
+          "value": "arm64-v8a"
+        },
+        {
+          "name": "CMAKE_ANDROID_NDK",
+          "value": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570"
+        },
+        {
+          "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
+          "value": "ON"
+        },
+        {
+          "name": "CMAKE_LIBRARY_OUTPUT_DIRECTORY",
+          "value": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\cmake\\release\\obj\\arm64-v8a"
+        },
+        {
+          "name": "CMAKE_MAKE_PROGRAM",
+          "value": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
+        },
+        {
+          "name": "CMAKE_SYSTEM_NAME",
+          "value": "Android"
+        },
+        {
+          "name": "CMAKE_SYSTEM_VERSION",
+          "value": "21"
+        }
+      ]
+    }
+  },
+  "cxxBuildFolder": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\release\\arm64-v8a",
+  "info": {
+    "abi": "ARM64_V8A",
+    "bitness": 64,
+    "deprecated": false,
+    "default": true
+  },
+  "originalCxxBuildFolder": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx\\cmake\\release\\arm64-v8a",
+  "variant": {
+    "buildSystemArgumentList": [],
+    "buildTargetSet": [],
+    "cFlagsList": [],
+    "cmakeSettingsConfiguration": "android-gradle-plugin-predetermined-name",
+    "cppFlagsList": [
+      "-std\u003dc++11 -frtti -fexceptions"
+    ],
+    "isDebuggableEnabled": false,
+    "module": {
+      "buildSystem": "CMAKE",
+      "cmake": {
+        "cmakeExe": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
+        "minimumCmakeVersion": "3.10.2",
+        "ninjaExe": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
+      },
+      "cmakeToolchainFile": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\build\\cmake\\android.toolchain.cmake",
+      "cxxFolder": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\.cxx",
+      "gradleModulePathName": ":libuvccamera",
+      "intermediatesFolder": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates",
+      "makeFile": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\src\\main\\cpp\\jni\\CMakeLists.txt",
+      "moduleBuildFile": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build.gradle",
+      "moduleRootFolder": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera",
+      "ndkDefaultAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkFolder": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570",
+      "ndkMetaAbiList": [
+        {
+          "abi": "ARMEABI_V7A",
+          "bitness": 32,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "ARM64_V8A",
+          "bitness": 64,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "X86",
+          "bitness": 32,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "X86_64",
+          "bitness": 64,
+          "deprecated": false,
+          "default": true
+        }
+      ],
+      "ndkMetaPlatforms": {
+        "min": 16,
+        "max": 29,
+        "aliases": {
+          "20": 19,
+          "25": 24,
+          "J": 16,
+          "J-MR1": 17,
+          "J-MR2": 18,
+          "K": 19,
+          "L": 21,
+          "L-MR1": 22,
+          "M": 23,
+          "N": 24,
+          "N-MR1": 24,
+          "O": 26,
+          "O-MR1": 27,
+          "P": 28,
+          "Q": 29
+        }
+      },
+      "ndkSupportedAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkVersion": "20.0.5594570",
+      "project": {
+        "compilerSettingsCacheFolder": "E:\\AS_Workspace\\UVCCamera2.0\\.cxx",
+        "cxxFolder": "E:\\AS_Workspace\\UVCCamera2.0\\.cxx",
+        "isBuildOnlyTargetAbiEnabled": true,
+        "isCmakeBuildCohabitationEnabled": false,
+        "isNativeCompilerSettingsCacheEnabled": false,
+        "rootBuildGradleFolder": "E:\\AS_Workspace\\UVCCamera2.0",
+        "sdkFolder": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk"
+      },
+      "splitsAbiFilterSet": [],
+      "stlSharedObjectMap": {
+        "LIBCXX_SHARED": {
+          "ARMEABI_V7A": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\arm-linux-androideabi\\libc++_shared.so",
+          "ARM64_V8A": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\aarch64-linux-android\\libc++_shared.so",
+          "X86": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\libc++_shared.so",
+          "X86_64": "C:\\Users\\guowei\\AppData\\Local\\Android\\Sdk\\ndk\\20.0.5594570\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\libc++_shared.so"
+        },
+        "LIBCXX_STATIC": {},
+        "NONE": {},
+        "SYSTEM": {}
+      }
+    },
+    "objFolder": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\cmake\\release\\obj",
+    "variantName": "release",
+    "validAbiList": [
+      "ARM64_V8A"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+Executable : C:\Users\guowei\AppData\Local\Android\Sdk\cmake\3.10.2.4988404\bin\ninja.exe
+arguments : 
+-C
+E:\AS_Workspace\UVCCamera2.0\libuvccamera\.cxx\cmake\debug\arm64-v8a
+uvc_native
+jvmArgs : 
+

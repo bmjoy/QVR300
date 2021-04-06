@@ -44,7 +44,7 @@ typedef struct ivslam_client_ops {
     void (*ivslam_getgnss)(void **, double &dt, float *gnss);
 } ivslam_client_ops_t;
 
-#define INVISION_SLAM_LIB "libivslam_client.so"
+#define INVISION_SLAM_LIB "libuvc_native.so"
 typedef struct {
     void *libHandle;
     void *context;
@@ -73,12 +73,12 @@ static inline ivslam_client_helper_t *IvSlamClient_Create() {
     }
     me->api_version = 1;
 
-    typedef void (*ivslam_initContext)(void **);
-    ivslam_initContext initContext = (ivslam_initContext) dlsym(me->libHandle, "InvisionSlam_InitContext");
-    if (!initContext) {
-        __android_log_print(ANDROID_LOG_ERROR, "InvisionSlamClient", "InvisionSlamClient initContext error=%s", dlerror());
-    }
-    initContext(&me->context);
+//    typedef void (*ivslam_initContext)(void **);
+//    ivslam_initContext initContext =  (ivslam_initContext) dlsym(me->libHandle,"InvisionSlam_InitContext");
+//    if(!initContext){
+//        __android_log_print(ANDROID_LOG_ERROR, "InvisionSlamClient","InvisionSlamClient initContext error=%s", dlerror());
+//    }
+//    initContext(&me->context);
 
     typedef void (*ivslam_start_fn)(void **);
     me->ops->ivslam_start = (ivslam_start_fn) dlsym(me->libHandle, "InvisionSlam_Start");
@@ -87,7 +87,7 @@ static inline ivslam_client_helper_t *IvSlamClient_Create() {
     me->ops->ivslam_stop = (ivslam_stop_fn) dlsym(me->libHandle, "InvisionSlam_Stop");
 
     typedef int (*ivslam_getpose_fn)(void **, float *, double, double &);
-    me->ops->ivslam_getpose = (ivslam_getpose_fn) dlsym(me->libHandle, "InvisionSlam_GetPose");
+    me->ops->ivslam_getpose = (ivslam_getpose_fn) dlsym(me->libHandle,"My_GetPose");
 
     typedef void (*ivslam_deinit_context_fn)(void **);
     me->ops->ivslam_deinitcontext = (ivslam_deinit_context_fn) dlsym(me->libHandle, "InvisionSlam_DeInitContext");

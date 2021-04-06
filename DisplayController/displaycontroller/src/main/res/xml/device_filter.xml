@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- samsung test phone -->
+    <usb-device
+        product-id="42240"
+        vendor-id="1256" />
+    <!--mouse inthevision-->
+    <usb-device
+        product-id="9488"
+        vendor-id="2362" />
+    <!--mouse zk mine-->
+    <usb-device
+        product-id="1922"
+        vendor-id="1118" />
+    <!-- a31-->
+    <usb-device
+        product-id="1625"
+        vendor-id="1118" />
+</resources>

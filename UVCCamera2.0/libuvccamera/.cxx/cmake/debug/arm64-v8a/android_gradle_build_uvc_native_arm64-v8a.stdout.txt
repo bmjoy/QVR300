@@ -1,0 +1,75 @@
+ninja: Entering directory `E:\AS_Workspace\UVCCamera2.0\libuvccamera\.cxx\cmake\debug\arm64-v8a'
+[1/2] Building CXX object CMakeFiles/uvc_native.dir/uvc_native.cpp.o
+In file included from E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:13:
+In file included from E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/render\MyGLRenderContext.h:10:
+In file included from E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/sample\GLSampleBase.h:10:
+In file included from E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\ImageDef.h:14:
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util/LogUtil.h:11:10: warning: 'LOG_TAG' macro redefined [-Wmacro-redefined]
+#define  LOG_TAG "ByteFlow"
+         ^
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/libuvc_android/source/libuvc/libuvc/include/libuvc/localdefines.h:33:9: note: previous definition is here
+#define LOG_TAG "libImiCamera"
+        ^
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:108:34: warning: data argument not used by format string [-Wformat-extra-args]
+            LOGCATD("native-lib","camera is already opened. you should release first");
+                    ~~~~~~~~~~~~ ^
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:219:30: warning: data argument not used by format string [-Wformat-extra-args]
+        LOGCATD("native-lib","Unable to read product string\n");
+                ~~~~~~~~~~~~ ^
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:220:26: warning: data argument not used by format string [-Wformat-extra-args]
+    LOGCATD("native-lib","Product String: %ls\n", wstr);
+            ~~~~~~~~~~~~ ^
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:226:30: warning: data argument not used by format string [-Wformat-extra-args]
+        LOGCATD("native-lib","Unable to read serial number string\n");
+                ~~~~~~~~~~~~ ^
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:227:26: warning: data argument not used by format string [-Wformat-extra-args]
+    LOGCATD("native-lib","Serial Number String: (%d) %ls", wstr[0], wstr);
+            ~~~~~~~~~~~~ ^
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:257:79: warning: format specifies type 'int' but the argument has type 'unsigned long' [-Wformat]
+        LOGCATD("Not enough buffer:size(%d) < sizeof(IMUPacket)(%d)\n", size, sizeof(IMUPacket));
+                                                                ~~            ^~~~~~~~~~~~~~~~~
+                                                                %lu
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:259:11: warning: format specifies type 'int' but the argument has type 'unsigned long' [-Wformat]
+        , sizeof(unsigned long), sizeof(unsigned short), sizeof(unsigned int), sizeof(int));
+          ^~~~~~~~~~~~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:259:34: warning: format specifies type 'int' but the argument has type 'unsigned long' [-Wformat]
+        , sizeof(unsigned long), sizeof(unsigned short), sizeof(unsigned int), sizeof(int));
+                                 ^~~~~~~~~~~~~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:259:58: warning: format specifies type 'int' but the argument has type 'unsigned long' [-Wformat]
+        , sizeof(unsigned long), sizeof(unsigned short), sizeof(unsigned int), sizeof(int));
+                                                         ^~~~~~~~~~~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/uvc_native.cpp:259:80: warning: format specifies type 'int' but the argument has type 'unsigned long' [-Wformat]
+        , sizeof(unsigned long), sizeof(unsigned short), sizeof(unsigned int), sizeof(int));
+                                                                               ^~~~~~~~~~~
+E:/AS_Workspace/UVCCamera2.0/libuvccamera/src/main/cpp/jni/util\LogUtil.h:16:70: note: expanded from macro 'LOGCATD'
+#define  LOGCATD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+                                                                     ^~~~~~~~~~~
+11 warnings generated.
+[2/2] Linking CXX shared library E:\AS_Workspace\UVCCamera2.0\libuvccamera\build\intermediates\cmake\debug\obj\arm64-v8a\libuvc_native.so

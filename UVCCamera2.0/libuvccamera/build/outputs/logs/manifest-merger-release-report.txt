@@ -1,0 +1,37 @@
+-- Merging decision tree log ---
+manifest
+ADDED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:24:1-31:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:24:1-31:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:24:1-31:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:24:1-31:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:24:1-31:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:24:1-31:12
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:24:1-31:12
+	package
+		ADDED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:25:5-40
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+	android:versionName
+		ADDED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:27:5-30
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:24:11-69
+	android:versionCode
+		ADDED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml:26:5-28
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+uses-sdk
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+		ADDED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+		ADDED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml
+		INJECTED from E:\AS_Workspace\UVCCamera2.0\libuvccamera\src\main\AndroidManifest.xml

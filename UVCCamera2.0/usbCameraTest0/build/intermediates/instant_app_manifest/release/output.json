@@ -1,0 +1,1 @@
+[{"outputType":{"type":"INSTANT_APP_MANIFEST"},"apkData":{"type":"MAIN","splits":[],"versionCode":8,"versionName":"3.00","enabled":true,"outputFile":"usbCameraTest0-release-unsigned.apk","fullName":"release","baseName":"release","dirName":""},"path":"AndroidManifest.xml","properties":{"packageId":"com.vr.display","split":"","minSdkVersion":"21"}}]

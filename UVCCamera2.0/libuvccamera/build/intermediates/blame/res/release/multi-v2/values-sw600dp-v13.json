@@ -1,0 +1,68 @@
+{
+    "logs": [
+        {
+            "outputFile": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\res\\merged\\release\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\353c0e409c6c7528f4f48f1e8d24d572\\appcompat-v7-27.1.1\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,124,193,263,337,413,472,543",
+                        "endColumns": "68,68,69,73,75,58,70,67",
+                        "endOffsets": "119,188,258,332,408,467,538,606"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\763c19a48cd7c8f8c5f9277fda5f8f09\\common-2.12.4\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,108,158",
+                        "endColumns": "52,49,49",
+                        "endOffsets": "103,153,203"
+                    },
+                    "to": {
+                        "startLines": "10,11,12",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "611,664,714",
+                        "endColumns": "52,49,49",
+                        "endOffsets": "659,709,759"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "E:\\AS_Workspace\\UVCCamera2.0\\libuvccamera\\build\\intermediates\\incremental\\mergeReleaseResources\\merged.dir\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\353c0e409c6c7528f4f48f1e8d24d572\\appcompat-v7-27.1.1\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,124,193,263,337,413,472,543",
+                        "endColumns": "68,68,69,73,75,58,70,67",
+                        "endOffsets": "119,188,258,332,408,467,538,606"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\guowei\\.gradle\\caches\\transforms-2\\files-2.1\\763c19a48cd7c8f8c5f9277fda5f8f09\\common-2.12.4\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,108,158",
+                        "endColumns": "52,49,49",
+                        "endOffsets": "103,153,203"
+                    },
+                    "to": {
+                        "startLines": "10,11,12",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "611,664,714",
+                        "endColumns": "52,49,49",
+                        "endOffsets": "659,709,759"
+                    }
+                }
+            ]
+        }
+    ]
+}
