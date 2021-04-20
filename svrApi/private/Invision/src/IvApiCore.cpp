@@ -30,7 +30,7 @@ extern void L_SetThreadPriority(const char *pName, int policy, int priority);
 extern SvrResult svrSetPerformanceLevelsInternal(svrPerfLevel cpuPerfLevel, svrPerfLevel gpuPerfLevel);
 
 static const std::string QCOM_GPU_BUSY_FILE_PATH = "/sys/class/kgsl/kgsl-3d0/gpubusy";
-static const char *SVRAPI_CONFIG_FILE_PATH = "/vendor/etc/qvr/svrapi_config.txt";
+static const char *SVRAPI_CONFIG_FILE_PATH = "/sdcard/etc/qvr/svrapi_config.txt";
 
 #if 0
 SvrResult invisionBeginVr(const svrBeginParams *pBeginParams){

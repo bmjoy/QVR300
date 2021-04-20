@@ -1109,15 +1109,16 @@ svrInitializeOptArgs(const svrInitParams *pInitParams, void *pTmAPI)
 }
 
 static bool userIvSlam() {
-    bool ret = false;
-    char value[4] = {0x00};
-    __system_property_get("persist.debug_useivslam", value);
-
-    //LOGI("%s, persist.debug_useivslam = %c",__FUNCTION__,value[0]);
-    if ('1' == value[0]) {
-        ret = true;
-    }
-    return ret;
+    return true;
+//    bool ret = false;
+//    char value[4] = {0x00};
+//    __system_property_get("persist.debug_useivslam", value);
+//
+//    //LOGI("%s, persist.debug_useivslam = %c",__FUNCTION__,value[0]);
+//    if ('1' == value[0]) {
+//        ret = true;
+//    }
+//    return ret;
 }
 
 int loadTransformMatrix(std::string path) {
@@ -1444,7 +1445,7 @@ SvrResult svrInitialize(const svrInitParams *pInitParams)
     } else {
         // willie change start 2020-8-20
         std::string customPath{"/persist/qvr/svrapi_config.txt"};
-        std::string oriPath{"/system/vendor/etc/qvr/svrapi_config.txt"};
+        std::string oriPath{"/sdcard/etc/qvr/svrapi_config.txt"};
         struct stat testBuffer;
         if (stat(customPath.c_str(), &testBuffer) == 0) {
             LoadVariableFile(customPath.c_str());
